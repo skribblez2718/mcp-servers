@@ -1,0 +1,33 @@
+[Unit]
+Description=Recipez MCP Server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=recipez-mcp
+Group=recipez-mcp
+WorkingDirectory=/home/recipez-mcp
+EnvironmentFile=/etc/recipez-mcp/secrets.env
+ExecStart=/home/recipez-mcp/.venv/bin/python -m recipez_mcp
+Restart=on-failure
+RestartSec=5s
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=recipez-mcp
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/home/recipez-mcp/recipez-mcp
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictRealtime=true
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+RestrictAddressFamilies=AF_INET AF_INET6
+
+[Install]
+WantedBy=multi-user.target

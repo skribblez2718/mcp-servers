@@ -1,0 +1,36 @@
+"""Verify Url"""
+
+from typing import Any
+from src.tools.base import BaseTool
+from src.utils.validation import ToolInputValidator
+
+
+class VerifyUrlImagesConfigUrlVerifyTool(BaseTool):
+    """Verify Url"""
+
+    def get_definition(self) -> dict[str, Any]:
+        """Get MCP tool definition."""
+        return {
+            "name": "verify_url_images_config_url_verify",
+            "description": "Verify Url",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                },
+                "required": []
+            }
+        }
+
+    async def execute(self, arguments: dict[str, Any]) -> dict[str, Any]:
+        """Execute verify_url_images_config_url_verify operation."""
+        self._log_execution_start(arguments)
+
+
+
+        # Build request
+        params = {}
+
+        response = await self.client.get("/api/v1/images/config/url/verify", params=params)
+
+        self._log_execution_end(response)
+        return response

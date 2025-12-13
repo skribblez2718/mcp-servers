@@ -1,0 +1,95 @@
+"""{{ (summary or 'Tool for ' + path) | escape_newlines }}"""
+
+from typing import Any
+from src.tools.base import BaseTool
+from src.utils.validation import ToolInputValidator
+
+
+class {{ class_name }}(BaseTool):
+    """{{ (description or summary) | escape_newlines }}"""
+
+    def get_definition(self) -> dict[str, Any]:
+        """Get MCP tool definition."""
+        return {
+            "name": "{{ tool_name }}",
+            "description": "{{ ((description or summary) | escape_newlines)[:256] }}",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+{% for param in parameters %}
+                    "{{ param.name }}": {
+                        "type": "{{ param.type }}",
+                        "description": "{{ ((param.description or '') | escape_newlines)[:100] }}"{% if param.default is defined and param.default is not none %},
+                        "default": {{ param.default | python_repr }}{% endif %}{% if param.minimum is defined and param.minimum is not none %},
+                        "minimum": {{ param.minimum }}{% endif %}{% if param.maximum is defined and param.maximum is not none %},
+                        "maximum": {{ param.maximum }}{% endif %}
+
+                    }{% if not loop.last %},{% endif %}
+
+{% endfor %}
+                },
+                "required": [{% for param in parameters if param.required %}"{{ param.name }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+            }
+        }
+
+    async def execute(self, arguments: dict[str, Any]) -> dict[str, Any]:
+        """Execute {{ tool_name }} operation."""
+        self._log_execution_start(arguments)
+
+{% for param in parameters if param.in == 'path' %}
+        # Validate path parameter: {{ param.name }}
+        {{ param.name }} = arguments.get("{{ param.name }}")
+        if {{ param.name }}:
+            {{ param.name }} = ToolInputValidator.validate_id({{ param.name }}, "{{ param.name }}")
+{% endfor %}
+
+{% for param in parameters if param.in == 'query' %}
+        # Query parameter: {{ param.name }}
+        {{ param.name }} = arguments.get("{{ param.name }}"{% if param.default is defined and param.default is not none %}, {{ param.default | python_repr }}{% endif %})
+{% endfor %}
+
+        # Build request
+{% if method == 'get' %}
+        params = {}
+{% for param in parameters if param.in == 'query' %}
+        if {{ param.name }} is not None:
+            params["{{ param.name }}"] = {{ param.name }}
+{% endfor %}
+
+        response = await self.client.get("{{ path }}", params=params)
+{% elif method == 'post' %}
+        json_data = {}
+{% for param in parameters if param.in == 'body' %}
+        if arguments.get("{{ param.name }}") is not None:
+            json_data["{{ param.name }}"] = arguments["{{ param.name }}"]
+{% endfor %}
+
+        response = await self.client.post("{{ path }}", json_data=json_data)
+{% elif method == 'put' %}
+        json_data = {}
+{% for param in parameters if param.in == 'body' %}
+        if arguments.get("{{ param.name }}") is not None:
+            json_data["{{ param.name }}"] = arguments["{{ param.name }}"]
+{% endfor %}
+
+        response = await self.client.put("{{ path }}", json_data=json_data)
+{% elif method == 'patch' %}
+        json_data = {}
+{% for param in parameters if param.in == 'body' %}
+        if arguments.get("{{ param.name }}") is not None:
+            json_data["{{ param.name }}"] = arguments["{{ param.name }}"]
+{% endfor %}
+
+        response = await self.client.patch("{{ path }}", json_data=json_data)
+{% elif method == 'delete' %}
+        params = {}
+{% for param in parameters if param.in == 'query' %}
+        if {{ param.name }} is not None:
+            params["{{ param.name }}"] = {{ param.name }}
+{% endfor %}
+
+        response = await self.client.delete("{{ path }}", params=params)
+{% endif %}
+
+        self._log_execution_end(response)
+        return response

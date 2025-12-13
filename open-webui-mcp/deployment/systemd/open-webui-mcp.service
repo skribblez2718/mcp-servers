@@ -1,0 +1,86 @@
+[Unit]
+Description=Open WebUI MCP Server
+Documentation=https://github.com/modelcontextprotocol/servers
+After=network.target
+
+[Service]
+Type=simple
+User=open-webui-mcp
+Group=open-webui-mcp
+WorkingDirectory=/home/open-webui-mcp
+
+# HTTP server execution (runs on configured PORT)
+ExecStart=/home/open-webui-mcp/.venv/bin/python /home/open-webui-mcp/src/server.py
+
+# Environment configuration
+EnvironmentFile=/home/open-webui-mcp/.env
+Environment=PATH=/home/open-webui-mcp/.local/bin:/usr/local/bin:/usr/bin:/bin
+
+# Restart configuration
+Restart=on-failure
+RestartSec=10
+StartLimitInterval=60
+StartLimitBurst=3
+
+# Security hardening (moderate level)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+RestrictRealtime=true
+RestrictNamespaces=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+# System call filtering (only allow safe syscalls)
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources @obsolete
+SystemCallErrorNumber=EPERM
+
+# Read-only paths (source code immutable at runtime)
+ReadOnlyPaths=/home/open-webui-mcp/src
+ReadOnlyPaths=/home/open-webui-mcp/.venv
+
+# Writable paths (logs only)
+ReadWritePaths=/var/log/open-webui-mcp
+
+# Resource limits
+CPUQuota=80%
+MemoryMax=1G
+MemoryHigh=800M
+TasksMax=64
+LimitNOFILE=4096
+LimitNPROC=64
+
+# Nice priority
+Nice=5
+
+# Standard I/O
+StandardInput=null
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=open-webui-mcp
+
+# Capability restrictions (drop all capabilities)
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+# Private devices (no hardware access needed)
+PrivateDevices=true
+DevicePolicy=closed
+
+# Network restrictions (stdio MCP, no network needed)
+# Note: RestrictAddressFamilies above allows only inet/inet6/unix
+# If your MCP server needs to make HTTP calls to Open WebUI, keep AF_INET/AF_INET6
+# If it only uses stdio, you can restrict further to AF_UNIX only
+
+# Process restrictions
+PrivateUsers=true
+RemoveIPC=true
+
+[Install]
+WantedBy=multi-user.target

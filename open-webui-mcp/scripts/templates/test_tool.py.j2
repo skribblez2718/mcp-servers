@@ -1,0 +1,113 @@
+"""Tests for {{ class_name }}."""
+
+import pytest
+from unittest.mock import AsyncMock, Mock
+from src.tools.{{ resource_plural }}.{{ tool_name }}_tool import {{ class_name }}
+from src.exceptions import ValidationError, NotFoundError, HTTPError
+
+
+class Test{{ class_name }}:
+    """Tests for {{ tool_name }}."""
+
+    @pytest.fixture
+    def mock_client(self):
+        """Create mock HTTP client."""
+        client = Mock()
+        {% if method == 'get' %}
+        client.get = AsyncMock(return_value={})
+        {% elif method == 'post' %}
+        client.post = AsyncMock(return_value={})
+        {% elif method == 'put' %}
+        client.put = AsyncMock(return_value={})
+        {% elif method == 'patch' %}
+        client.patch = AsyncMock(return_value={})
+        {% elif method == 'delete' %}
+        client.delete = AsyncMock(return_value={})
+        {% endif %}
+        return client
+
+    @pytest.fixture
+    def mock_config(self):
+        """Create mock config."""
+        config = Mock()
+        return config
+
+    @pytest.fixture
+    def tool(self, mock_client, mock_config):
+        """Create tool instance."""
+        return {{ class_name }}(client=mock_client, config=mock_config)
+
+    def test_get_definition(self, tool):
+        """Test tool definition structure."""
+        definition = tool.get_definition()
+
+        assert definition["name"] == "{{ tool_name }}"
+        assert "description" in definition
+        assert "inputSchema" in definition
+        assert definition["inputSchema"]["type"] == "object"
+
+    @pytest.mark.asyncio
+    async def test_execute_success(self, tool, mock_client):
+        """Test successful execution."""
+        {% if method == 'get' %}
+        mock_client.get.return_value = {"status": "ok"}
+        {% elif method == 'post' %}
+        mock_client.post.return_value = {"status": "ok"}
+        {% elif method == 'put' %}
+        mock_client.put.return_value = {"status": "ok"}
+        {% elif method == 'patch' %}
+        mock_client.patch.return_value = {"status": "ok"}
+        {% elif method == 'delete' %}
+        mock_client.delete.return_value = {"status": "ok"}
+        {% endif %}
+
+        result = await tool.execute({})
+
+        assert result is not None
+        {% if method == 'get' %}
+        mock_client.get.assert_called_once()
+        {% elif method == 'post' %}
+        mock_client.post.assert_called_once()
+        {% elif method == 'put' %}
+        mock_client.put.assert_called_once()
+        {% elif method == 'patch' %}
+        mock_client.patch.assert_called_once()
+        {% elif method == 'delete' %}
+        mock_client.delete.assert_called_once()
+        {% endif %}
+
+    @pytest.mark.asyncio
+    async def test_execute_not_found(self, tool, mock_client):
+        """Test handling of 404 errors."""
+        {% if method == 'get' %}
+        mock_client.get.side_effect = NotFoundError("Not found")
+        {% elif method == 'post' %}
+        mock_client.post.side_effect = NotFoundError("Not found")
+        {% elif method == 'put' %}
+        mock_client.put.side_effect = NotFoundError("Not found")
+        {% elif method == 'patch' %}
+        mock_client.patch.side_effect = NotFoundError("Not found")
+        {% elif method == 'delete' %}
+        mock_client.delete.side_effect = NotFoundError("Not found")
+        {% endif %}
+
+        with pytest.raises(NotFoundError):
+            await tool.execute({})
+
+    @pytest.mark.asyncio
+    async def test_execute_http_error(self, tool, mock_client):
+        """Test handling of HTTP errors."""
+        {% if method == 'get' %}
+        mock_client.get.side_effect = HTTPError("Server error", status_code=500)
+        {% elif method == 'post' %}
+        mock_client.post.side_effect = HTTPError("Server error", status_code=500)
+        {% elif method == 'put' %}
+        mock_client.put.side_effect = HTTPError("Server error", status_code=500)
+        {% elif method == 'patch' %}
+        mock_client.patch.side_effect = HTTPError("Server error", status_code=500)
+        {% elif method == 'delete' %}
+        mock_client.delete.side_effect = HTTPError("Server error", status_code=500)
+        {% endif %}
+
+        with pytest.raises(HTTPError):
+            await tool.execute({})

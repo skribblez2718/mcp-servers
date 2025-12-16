@@ -1,26 +1,23 @@
 #!/bin/bash
-# setup-system.sh - System-level setup for recipez-mcp service
+# setup-system.sh - Install systemd service file for recipez-mcp
 # Must be run as root
+#
+# This script ONLY handles the systemd service file installation.
+# Run setup-user.sh to create the service user and set up the application.
 
 set -euo pipefail
 
 # Configuration
-SERVICE_USER="recipez-mcp"
 SERVICE_FILE_SRC="/home/user/projects/mcp-servers/recipez-mcp/recipez-mcp.service"
 SERVICE_FILE_DST="/etc/systemd/system/recipez-mcp.service"
 
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 log_info() {
     echo -e "${GREEN}[INFO]${NC} $1"
-}
-
-log_warn() {
-    echo -e "${YELLOW}[WARN]${NC} $1"
 }
 
 log_error() {
@@ -31,16 +28,6 @@ log_error() {
 if [[ $EUID -ne 0 ]]; then
     log_error "This script must be run as root"
     exit 1
-fi
-
-# Check if service user exists
-log_info "Checking if user '${SERVICE_USER}' exists..."
-if id "${SERVICE_USER}" &>/dev/null; then
-    log_info "User '${SERVICE_USER}' already exists"
-else
-    log_info "Creating system user '${SERVICE_USER}'..."
-    useradd -r -m -s /usr/sbin/nologin "${SERVICE_USER}"
-    log_info "User '${SERVICE_USER}' created successfully"
 fi
 
 # Verify source service file exists
@@ -68,10 +55,8 @@ systemctl daemon-reload
 log_info "System setup complete!"
 log_info ""
 log_info "Next steps:"
-log_info "  1. Copy project files to /home/${SERVICE_USER}/recipez-mcp/"
-log_info "  2. Run setup-user.sh as the ${SERVICE_USER} user:"
-log_info "     sudo -u ${SERVICE_USER} /path/to/setup-user.sh"
-log_info "  3. Configure /etc/recipez-mcp/secrets.env with your credentials"
-log_info "  4. Enable and start the service:"
+log_info "  1. Run setup-user.sh (as root) to create user and set up application"
+log_info "  2. Configure credentials in .env file"
+log_info "  3. Enable and start the service:"
 log_info "     systemctl enable recipez-mcp"
 log_info "     systemctl start recipez-mcp"

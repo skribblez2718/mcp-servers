@@ -1,7 +1,6 @@
-"""AI-powered tools for recipe generation and speech-to-text."""
+"""AI-powered tools for recipe generation and modification."""
 
 import time
-from pathlib import Path
 from typing import Any, Dict
 
 from recipez_mcp.tools.base_tool import BaseTool
@@ -9,7 +8,7 @@ from recipez_mcp.utils.logging import log_tool_execution
 
 
 class AITool(BaseTool):
-    """AI-powered recipe operations: create, modify, speech-to-text."""
+    """AI-powered recipe operations: create and modify."""
 
     def name(self) -> str:
         """Return tool name."""
@@ -20,8 +19,7 @@ class AITool(BaseTool):
         return (
             "AI-powered recipe operations. "
             "Operations: 'create' (generate recipe from prompt), "
-            "'modify' (modify existing recipe with instructions), "
-            "'stt' (speech-to-text transcription from audio file)."
+            "'modify' (modify existing recipe with instructions)."
         )
 
     def input_schema(self) -> Dict[str, Any]:
@@ -31,7 +29,7 @@ class AITool(BaseTool):
             "properties": {
                 "operation": {
                     "type": "string",
-                    "enum": ["create", "modify", "stt"],
+                    "enum": ["create", "modify"],
                     "description": "AI operation to perform",
                 },
                 "message": {
@@ -41,10 +39,6 @@ class AITool(BaseTool):
                 "recipe_id": {
                     "type": "string",
                     "description": "Recipe UUID (required for modify)",
-                },
-                "audio_file_path": {
-                    "type": "string",
-                    "description": "Path to audio file (required for stt)",
                 },
             },
             "required": ["operation"],
@@ -78,23 +72,6 @@ class AITool(BaseTool):
                     "/api/ai/modify",
                     json=payload,
                 )
-            elif operation == "stt":
-                audio_file_path = params["audio_file_path"]
-                audio_path = Path(audio_file_path)
-
-                if not audio_path.exists():
-                    raise FileNotFoundError(
-                        f"Audio file not found: {audio_file_path}"
-                    )
-
-                # Read audio file and send as multipart/form-data
-                with open(audio_path, "rb") as audio_file:
-                    files = {"audio": (audio_path.name, audio_file)}
-                    result = await self.http_client.post(
-                        "/api/ai/stt",
-                        files=files,
-                        timeout_override=120,  # AI operations may take longer
-                    )
             else:
                 raise ValueError(f"Invalid operation: {operation}")
 

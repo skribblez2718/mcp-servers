@@ -409,12 +409,6 @@ class AIModifyRecipeInput(BaseModel):
             raise ValueError(f"Invalid UUID format: {v}") from e
 
 
-class AISTTInput(BaseModel):
-    """Input for speech-to-text transcription."""
-
-    audio_file_path: str = Field(..., description="Path to audio file to transcribe")
-
-
 # ==================== GROCERY MODELS ====================
 
 class GroceryListInput(BaseModel):

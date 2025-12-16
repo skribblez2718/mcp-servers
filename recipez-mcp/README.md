@@ -103,39 +103,99 @@ Server will start on `http://0.0.0.0:8000` (default) and provide:
 
 ### Production (systemd)
 
+#### Automated Setup (Recommended)
+
+Use the provided deployment scripts:
+
+```bash
+# 1. Create user, copy files, install dependencies
+sudo ./scripts/setup-user.sh
+
+# 2. Edit credentials
+sudo nano /home/recipez-mcp/recipez-mcp/.env
+
+# 3. Install systemd service
+sudo ./scripts/setup-system.sh
+
+# 4. Enable and start service
+sudo systemctl enable recipez-mcp
+sudo systemctl start recipez-mcp
+```
+
+#### Manual Setup
+
 1. **Create Service User**:
    ```bash
-   sudo useradd -r -s /bin/false recipez
+   sudo useradd -r -m -s /usr/sbin/nologin recipez-mcp
    ```
 
-2. **Install to /opt**:
+2. **Copy Project Files**:
    ```bash
-   sudo mkdir -p /opt/recipez-mcp
-   sudo cp -r . /opt/recipez-mcp/
-   sudo chown -R recipez:recipez /opt/recipez-mcp
+   sudo mkdir -p /home/recipez-mcp/recipez-mcp
+   sudo cp -r . /home/recipez-mcp/recipez-mcp/
+   sudo chown -R recipez-mcp:recipez-mcp /home/recipez-mcp/recipez-mcp
    ```
 
-3. **Configure Secrets**:
+3. **Install uv and Dependencies** (as service user):
    ```bash
-   sudo mkdir -p /etc/recipez-mcp
-   sudo cp .env /etc/recipez-mcp/secrets.env
-   sudo chown recipez:recipez /etc/recipez-mcp/secrets.env
-   sudo chmod 600 /etc/recipez-mcp/secrets.env
+   sudo -u recipez-mcp bash -c 'curl -LsSf https://astral.sh/uv/install.sh | sh'
+   sudo -u recipez-mcp bash -c 'cd /home/recipez-mcp/recipez-mcp && ~/.local/bin/uv venv && ~/.local/bin/uv sync'
    ```
 
-4. **Install systemd Service**:
+4. **Configure Environment**:
+   ```bash
+   sudo -u recipez-mcp cp /home/recipez-mcp/recipez-mcp/.env.example /home/recipez-mcp/recipez-mcp/.env
+   sudo nano /home/recipez-mcp/recipez-mcp/.env
+   ```
+
+5. **Install systemd Service**:
    ```bash
    sudo cp recipez-mcp.service /etc/systemd/system/
+   sudo chown root:root /etc/systemd/system/recipez-mcp.service
+   sudo chmod 644 /etc/systemd/system/recipez-mcp.service
    sudo systemctl daemon-reload
    sudo systemctl enable recipez-mcp
    sudo systemctl start recipez-mcp
    ```
 
-5. **Check Status**:
+6. **Check Status**:
    ```bash
    sudo systemctl status recipez-mcp
    sudo journalctl -u recipez-mcp -f
    ```
+
+### Deployment Scripts
+
+Two scripts are provided in `scripts/` for automated deployment:
+
+#### setup-user.sh
+
+Creates the service user and sets up the application environment. **Must be run as root.**
+
+```bash
+sudo ./scripts/setup-user.sh
+```
+
+**Actions:**
+- Creates `recipez-mcp` system user (if not exists)
+- Copies project files to `/home/recipez-mcp/recipez-mcp/`
+- Sets correct ownership
+- Installs uv package manager
+- Creates `.env` from `.env.example`
+- Creates virtual environment and installs dependencies
+
+#### setup-system.sh
+
+Installs the systemd service file. **Must be run as root.**
+
+```bash
+sudo ./scripts/setup-system.sh
+```
+
+**Actions:**
+- Copies `recipez-mcp.service` to `/etc/systemd/system/`
+- Sets root ownership and correct permissions
+- Reloads systemd daemon
 
 ## MCP Client Setup
 
@@ -507,15 +567,22 @@ PORT=9000
 ## Architecture
 
 ```
-recipez_mcp/
-├── models/          # Pydantic models (API and MCP)
-├── utils/           # Validation, errors, logging
-├── config/          # Settings management
-├── client/          # HTTP client with retry logic
-├── tools/           # MCP tool implementations (12 tools)
-├── factory.py       # Tool registration and dependency injection
-├── server.py        # Starlette ASGI app with SSE transport
-└── __main__.py      # CLI entry point
+recipez-mcp/
+├── scripts/              # Deployment automation
+│   ├── setup-system.sh   # systemd service installation
+│   └── setup-user.sh     # User creation and app setup
+├── src/recipez_mcp/
+│   ├── models/           # Pydantic models (API and MCP)
+│   ├── utils/            # Validation, errors, logging
+│   ├── config/           # Settings management
+│   ├── client/           # HTTP client with retry logic
+│   ├── tools/            # MCP tool implementations (12 tools)
+│   ├── factory.py        # Tool registration and dependency injection
+│   ├── server.py         # Starlette ASGI app with SSE transport
+│   └── __main__.py       # CLI entry point
+├── recipez-mcp.service   # systemd unit file
+├── pyproject.toml        # Python project configuration
+└── .env.example          # Environment template
 ```
 
 **Design Principles**:

@@ -1,12 +1,22 @@
 #!/bin/bash
-# setup-user.sh - Application setup for recipez-mcp
-# Must be run as the recipez-mcp user
+# setup-user.sh - Set up recipez-mcp application environment
+# Must be run as root
+#
+# Prerequisites:
+#   User must already exist: useradd --system --shell /bin/false -m recipez-mcp
+#
+# This script:
+# 1. Copies project files to the user's home directory
+# 2. Installs uv and sets up the Python environment
+# 3. Creates .env from .env.example
+# 4. Creates virtual environment and installs dependencies
 
 set -euo pipefail
 
 # Configuration
-EXPECTED_USER="recipez-mcp"
-PROJECT_DIR="/home/recipez-mcp/recipez-mcp"
+SERVICE_USER="recipez-mcp"
+PROJECT_SRC="/home/user/projects/mcp-servers/recipez-mcp"
+PROJECT_DST="/home/${SERVICE_USER}/recipez-mcp"
 
 # Colors for output
 RED='\033[0;31m'
@@ -26,84 +36,89 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Verify running as correct user
-CURRENT_USER=$(whoami)
-if [[ "${CURRENT_USER}" != "${EXPECTED_USER}" ]]; then
-    log_error "This script must be run as '${EXPECTED_USER}', not '${CURRENT_USER}'"
-    log_error "Use: sudo -u ${EXPECTED_USER} $0"
+# Check if running as root
+if [[ $EUID -ne 0 ]]; then
+    log_error "This script must be run as root"
     exit 1
 fi
 
-# Verify project directory exists
-if [[ ! -d "${PROJECT_DIR}" ]]; then
-    log_error "Project directory not found: ${PROJECT_DIR}"
-    log_error "Please copy the project files first"
+# Verify user exists
+if ! id "${SERVICE_USER}" &>/dev/null; then
+    log_error "User '${SERVICE_USER}' does not exist"
+    log_error "Create it first: useradd --system --shell /bin/false -m ${SERVICE_USER}"
     exit 1
 fi
 
-# Install uv package manager
-log_info "Installing uv package manager..."
-if command -v uv &>/dev/null; then
+# Verify source project exists
+if [[ ! -d "${PROJECT_SRC}" ]]; then
+    log_error "Project source not found: ${PROJECT_SRC}"
+    exit 1
+fi
+
+# Step 1: Copy project files
+log_info "Copying project files to ${PROJECT_DST}..."
+if [[ -d "${PROJECT_DST}" ]]; then
+    log_warn "Project directory already exists, updating files..."
+fi
+mkdir -p "${PROJECT_DST}"
+# Copy all files except .git, .venv, __pycache__, .env (but include .env.example)
+rsync -a --delete \
+    --exclude='.git' \
+    --exclude='.venv' \
+    --exclude='__pycache__' \
+    --exclude='*.pyc' \
+    --exclude='.env' \
+    --exclude='.mypy_cache' \
+    --exclude='.pytest_cache' \
+    --exclude='.ruff_cache' \
+    "${PROJECT_SRC}/" "${PROJECT_DST}/"
+
+# Step 2: Set ownership
+log_info "Setting ownership to ${SERVICE_USER}:${SERVICE_USER}..."
+chown -R "${SERVICE_USER}:${SERVICE_USER}" "${PROJECT_DST}"
+
+# Step 3: Install uv for the service user
+# Use su -s to override /bin/false shell
+log_info "Installing uv for ${SERVICE_USER}..."
+if su -s /bin/bash "${SERVICE_USER}" -c 'test -f ~/.local/bin/uv'; then
     log_info "uv is already installed"
 else
-    curl -LsSf https://astral.sh/uv/install.sh | sh
+    su -s /bin/bash "${SERVICE_USER}" -c 'curl -LsSf https://astral.sh/uv/install.sh | sh'
     log_info "uv installed successfully"
 fi
 
-# Add uv to PATH for current session
-export PATH="${HOME}/.local/bin:${PATH}"
-
-# Verify uv is available
-if ! command -v uv &>/dev/null; then
-    log_error "uv installation failed or not in PATH"
-    exit 1
-fi
-
-log_info "uv version: $(uv --version)"
-
-# Navigate to project directory
-log_info "Changing to project directory: ${PROJECT_DIR}"
-cd "${PROJECT_DIR}"
-
-# Copy .env.example to .env if .env doesn't exist
-if [[ -f ".env" ]]; then
+# Step 4: Copy .env.example to .env if .env doesn't exist
+log_info "Setting up environment file..."
+if [[ -f "${PROJECT_DST}/.env" ]]; then
     log_warn ".env already exists, skipping copy"
 else
-    if [[ -f ".env.example" ]]; then
-        log_info "Copying .env.example to .env..."
-        cp .env.example .env
-        log_info ".env created - remember to edit it with your credentials"
+    if [[ -f "${PROJECT_DST}/.env.example" ]]; then
+        su -s /bin/bash "${SERVICE_USER}" -c "cp ${PROJECT_DST}/.env.example ${PROJECT_DST}/.env"
+        log_info ".env created from .env.example"
     else
-        log_error ".env.example not found in ${PROJECT_DIR}"
+        log_error ".env.example not found in ${PROJECT_DST}"
         exit 1
     fi
 fi
 
-# Create virtual environment
-log_info "Creating virtual environment..."
-if [[ -d ".venv" ]]; then
-    log_warn "Virtual environment already exists"
-else
+# Step 5: Create virtual environment and install dependencies
+log_info "Creating virtual environment and installing dependencies..."
+su -s /bin/bash "${SERVICE_USER}" -c "
+    export PATH=\"\${HOME}/.local/bin:\${PATH}\"
+    cd ${PROJECT_DST}
     uv venv
-    log_info "Virtual environment created"
-fi
-
-# Install dependencies
-log_info "Installing dependencies..."
-uv sync
-log_info "Dependencies installed successfully"
+    uv sync
+"
+log_info "Virtual environment created and dependencies installed"
 
 log_info ""
 log_info "User setup complete!"
 log_info ""
 log_info "Next steps:"
-log_info "  1. Edit ${PROJECT_DIR}/.env with your credentials:"
+log_info "  1. Edit ${PROJECT_DST}/.env with your credentials:"
 log_info "     - RECIPEZ_BASE_URL"
 log_info "     - RECIPEZ_JWT_TOKEN"
-log_info "  2. Create secrets file for systemd (as root):"
-log_info "     sudo mkdir -p /etc/recipez-mcp"
-log_info "     sudo cp ${PROJECT_DIR}/.env /etc/recipez-mcp/secrets.env"
-log_info "     sudo chown ${EXPECTED_USER}:${EXPECTED_USER} /etc/recipez-mcp/secrets.env"
-log_info "     sudo chmod 600 /etc/recipez-mcp/secrets.env"
-log_info "  3. Start the service (as root):"
-log_info "     sudo systemctl start recipez-mcp"
+log_info "  2. Run setup-system.sh to install the systemd service"
+log_info "  3. Enable and start the service:"
+log_info "     systemctl enable recipez-mcp"
+log_info "     systemctl start recipez-mcp"

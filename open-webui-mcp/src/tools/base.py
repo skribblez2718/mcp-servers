@@ -120,7 +120,7 @@ class BaseTool:
             extra={
                 "tool_name": self.__class__.__name__,
                 "duration_ms": duration_ms,
-                "result_keys": list(result.keys()) if isinstance(result, dict) else f"[{len(result)} items]",
+                "result_keys": list(result.keys()) if isinstance(result, dict) else (f"[{len(result)} items]" if isinstance(result, (list, tuple)) else str(type(result).__name__)),
                 "result_preview": result_preview
             }
         )

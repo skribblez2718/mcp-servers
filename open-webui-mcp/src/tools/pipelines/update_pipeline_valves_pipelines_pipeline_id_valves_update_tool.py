@@ -18,11 +18,16 @@ class UpdatePipelineValvesPipelinesPipelineIdValvesUpdateTool(BaseTool):
                 "properties": {
                     "pipeline_id": {
                         "type": "string",
-                        "description": ""
+                        "description": "The ID of the pipeline"
                     },
                     "urlIdx": {
                         "type": "string",
-                        "description": ""
+                        "description": "The URL index of the pipeline server"
+                    },
+                    "valves": {
+                        "type": "object",
+                        "description": "The valve configuration data to update",
+                        "additionalProperties": True
                     }
                 },
                 "required": ["pipeline_id", "urlIdx"]
@@ -42,9 +47,14 @@ class UpdatePipelineValvesPipelinesPipelineIdValvesUpdateTool(BaseTool):
         urlIdx = arguments.get("urlIdx")
 
         # Build request
-        json_data = {}
+        params = {}
+        if urlIdx is not None:
+            params["urlIdx"] = urlIdx
 
-        response = await self.client.post(f"/api/v1/pipelines/{pipeline_id}/valves/update", json_data=json_data)
+        # Get valve data from arguments (or empty object if not provided)
+        json_data = arguments.get("valves", {})
+
+        response = await self.client.post(f"/api/v1/pipelines/{pipeline_id}/valves/update", json_data=json_data, params=params)
 
         self._log_execution_end(response)
         return response

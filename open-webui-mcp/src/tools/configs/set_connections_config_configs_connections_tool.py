@@ -16,8 +16,16 @@ class SetConnectionsConfigConfigsConnectionsTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "ENABLE_DIRECT_CONNECTIONS": {
+                        "type": "boolean",
+                        "description": "Enable direct connections to models"
+                    },
+                    "ENABLE_BASE_MODELS_CACHE": {
+                        "type": "boolean",
+                        "description": "Enable caching of base models"
+                    }
                 },
-                "required": []
+                "required": ["ENABLE_DIRECT_CONNECTIONS", "ENABLE_BASE_MODELS_CACHE"]
             }
         }
 
@@ -28,7 +36,10 @@ class SetConnectionsConfigConfigsConnectionsTool(BaseTool):
 
 
         # Build request
-        json_data = {}
+        json_data = {
+            "ENABLE_DIRECT_CONNECTIONS": arguments.get("ENABLE_DIRECT_CONNECTIONS"),
+            "ENABLE_BASE_MODELS_CACHE": arguments.get("ENABLE_BASE_MODELS_CACHE")
+        }
 
         response = await self.client.post("/api/v1/configs/connections", json_data=json_data)
 

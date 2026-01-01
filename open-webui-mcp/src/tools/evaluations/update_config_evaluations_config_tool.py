@@ -16,6 +16,15 @@ class UpdateConfigEvaluationsConfigTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "ENABLE_EVALUATION_ARENA_MODELS": {
+                        "type": ["boolean", "null"],
+                        "description": "Enable evaluation arena models (optional)"
+                    },
+                    "EVALUATION_ARENA_MODELS": {
+                        "type": ["array", "null"],
+                        "items": {"type": "object", "additionalProperties": True},
+                        "description": "Array of evaluation arena model configurations (optional)"
+                    }
                 },
                 "required": []
             }
@@ -29,6 +38,11 @@ class UpdateConfigEvaluationsConfigTool(BaseTool):
 
         # Build request
         json_data = {}
+
+        if "ENABLE_EVALUATION_ARENA_MODELS" in arguments:
+            json_data["ENABLE_EVALUATION_ARENA_MODELS"] = arguments["ENABLE_EVALUATION_ARENA_MODELS"]
+        if "EVALUATION_ARENA_MODELS" in arguments:
+            json_data["EVALUATION_ARENA_MODELS"] = arguments["EVALUATION_ARENA_MODELS"]
 
         response = await self.client.post("/api/v1/evaluations/config", json_data=json_data)
 

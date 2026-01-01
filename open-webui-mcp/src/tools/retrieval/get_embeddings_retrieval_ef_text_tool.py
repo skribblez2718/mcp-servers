@@ -1,8 +1,8 @@
 """Get Embeddings"""
 
 from typing import Any
+from urllib.parse import quote
 from src.tools.base import BaseTool
-from src.utils.validation import ToolInputValidator
 
 
 class GetEmbeddingsRetrievalEfTextTool(BaseTool):
@@ -18,7 +18,7 @@ class GetEmbeddingsRetrievalEfTextTool(BaseTool):
                 "properties": {
                     "text": {
                         "type": "string",
-                        "description": ""
+                        "description": "Text to get embeddings for"
                     }
                 },
                 "required": ["text"]
@@ -29,16 +29,14 @@ class GetEmbeddingsRetrievalEfTextTool(BaseTool):
         """Execute get_embeddings_retrieval_ef_text operation."""
         self._log_execution_start(arguments)
 
-        # Validate path parameter: text
-        text = arguments.get("text")
-        if text:
-            text = ToolInputValidator.validate_id(text, "text")
-
+        # Get text parameter and URL-encode it for path usage
+        text = arguments.get("text", "")
+        encoded_text = quote(text, safe="")
 
         # Build request
         params = {}
 
-        response = await self.client.get(f"/api/v1/retrieval/ef/{text}", params=params)
+        response = await self.client.get(f"/api/v1/retrieval/ef/{encoded_text}", params=params)
 
         self._log_execution_end(response)
         return response

@@ -12,16 +12,16 @@ class PushModelOllamaPushUrlIdxTool(BaseTool):
         """Get MCP tool definition."""
         return {
             "name": "push_model_ollama_push_url_idx",
-            "description": "Push Model",
+            "description": "Push Model to specific Ollama instance",
             "inputSchema": {
                 "type": "object",
                 "properties": {
-                    "url_idx": {
-                        "type": "string",
-                        "description": ""
-                    }
+                    "url_idx": {"type": ["integer", "null"], "description": "URL index"},
+                    "model": {"type": "string", "description": "Model name to push"},
+                    "insecure": {"type": ["boolean", "null"], "description": "Allow insecure connections"},
+                    "stream": {"type": ["boolean", "null"], "description": "Stream the response"}
                 },
-                "required": ["url_idx"]
+                "required": ["url_idx", "model"]
             }
         }
 
@@ -29,16 +29,17 @@ class PushModelOllamaPushUrlIdxTool(BaseTool):
         """Execute push_model_ollama_push_url_idx operation."""
         self._log_execution_start(arguments)
 
-        # Validate path parameter: url_idx
+        # Path parameter: url_idx
         url_idx = arguments.get("url_idx")
-        if url_idx:
-            url_idx = ToolInputValidator.validate_id(url_idx, "url_idx")
 
+        # Build request - PushModelForm
+        json_data = {"model": arguments["model"]}
+        if arguments.get("insecure") is not None:
+            json_data["insecure"] = arguments["insecure"]
+        if arguments.get("stream") is not None:
+            json_data["stream"] = arguments["stream"]
 
-        # Build request
-        params = {}
-
-        response = await self.client.delete(f"/ollama/api/push/{url_idx}", params=params)
+        response = await self.client.delete(f"/ollama/api/push/{url_idx}", json_data=json_data)
 
         self._log_execution_end(response)
         return response

@@ -17,11 +17,44 @@ class GenerateOpenaiChatCompletionOllamaV1ChatCompletionsTool(BaseTool):
                 "type": "object",
                 "properties": {
                     "url_idx": {
+                        "type": ["integer", "null"],
+                        "description": "Index of the Ollama URL to use"
+                    },
+                    "model": {
                         "type": "string",
-                        "description": ""
+                        "description": "Name of the model to use"
+                    },
+                    "messages": {
+                        "type": "array",
+                        "items": {"type": "object"},
+                        "description": "Array of message objects with role and content"
+                    },
+                    "max_tokens": {
+                        "type": ["integer", "null"],
+                        "description": "Maximum tokens to generate"
+                    },
+                    "temperature": {
+                        "type": ["number", "null"],
+                        "description": "Sampling temperature"
+                    },
+                    "top_p": {
+                        "type": ["number", "null"],
+                        "description": "Nucleus sampling parameter"
+                    },
+                    "stream": {
+                        "type": ["boolean", "null"],
+                        "description": "Stream the response"
+                    },
+                    "stop": {
+                        "oneOf": [
+                            {"type": "string"},
+                            {"type": "array", "items": {"type": "string"}},
+                            {"type": "null"}
+                        ],
+                        "description": "Stop sequences"
                     }
                 },
-                "required": []
+                "required": ["model", "messages"]
             }
         }
 
@@ -31,12 +64,26 @@ class GenerateOpenaiChatCompletionOllamaV1ChatCompletionsTool(BaseTool):
 
 
         # Query parameter: url_idx
+        params = {}
         url_idx = arguments.get("url_idx")
+        if url_idx is not None:
+            params["url_idx"] = url_idx
 
-        # Build request
-        json_data = {}
+        # Build request body - additionalProperties object
+        json_data = {
+            "model": arguments["model"],
+            "messages": arguments["messages"]
+        }
+        optional_fields = ["max_tokens", "temperature", "top_p", "stream", "stop"]
+        for field in optional_fields:
+            if arguments.get(field) is not None:
+                json_data[field] = arguments[field]
+        # Pass through any additional properties
+        for key, value in arguments.items():
+            if key not in ["url_idx", "model", "messages", "max_tokens", "temperature", "top_p", "stream", "stop"] and value is not None:
+                json_data[key] = value
 
-        response = await self.client.post("/ollama/v1/chat/completions", json_data=json_data)
+        response = await self.client.post("/ollama/v1/chat/completions", json_data=json_data, params=params)
 
         self._log_execution_end(response)
         return response

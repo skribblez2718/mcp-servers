@@ -18,10 +18,33 @@ class UpdateChannelByIdChannelsIdUpdateTool(BaseTool):
                 "properties": {
                     "id": {
                         "type": "string",
-                        "description": ""
+                        "description": "Channel ID"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Channel name"
+                    },
+                    "description": {
+                        "type": ["string", "null"],
+                        "description": "Channel description"
+                    },
+                    "data": {
+                        "type": ["object", "null"],
+                        "description": "Additional channel data",
+                        "additionalProperties": True
+                    },
+                    "meta": {
+                        "type": ["object", "null"],
+                        "description": "Channel metadata",
+                        "additionalProperties": True
+                    },
+                    "access_control": {
+                        "type": ["object", "null"],
+                        "description": "Access control settings",
+                        "additionalProperties": True
                     }
                 },
-                "required": ["id"]
+                "required": ["id", "name"]
             }
         }
 
@@ -36,7 +59,18 @@ class UpdateChannelByIdChannelsIdUpdateTool(BaseTool):
 
 
         # Build request
-        json_data = {}
+        json_data = {
+            "name": arguments.get("name")
+        }
+        # Add optional fields if provided
+        if arguments.get("description") is not None:
+            json_data["description"] = arguments.get("description")
+        if arguments.get("data") is not None:
+            json_data["data"] = arguments.get("data")
+        if arguments.get("meta") is not None:
+            json_data["meta"] = arguments.get("meta")
+        if arguments.get("access_control") is not None:
+            json_data["access_control"] = arguments.get("access_control")
 
         response = await self.client.post(f"/api/v1/channels/{id}/update", json_data=json_data)
 

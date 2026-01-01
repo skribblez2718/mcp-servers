@@ -18,7 +18,11 @@ class CloneChatByIdChatsIdCloneTool(BaseTool):
                 "properties": {
                     "id": {
                         "type": "string",
-                        "description": ""
+                        "description": "Chat ID to clone"
+                    },
+                    "title": {
+                        "type": ["string", "null"],
+                        "description": "Optional title for the cloned chat"
                     }
                 },
                 "required": ["id"]
@@ -34,9 +38,10 @@ class CloneChatByIdChatsIdCloneTool(BaseTool):
         if id:
             id = ToolInputValidator.validate_id(id, "id")
 
-
         # Build request
         json_data = {}
+        if arguments.get("title") is not None:
+            json_data["title"] = arguments["title"]
 
         response = await self.client.post(f"/api/v1/chats/{id}/clone", json_data=json_data)
 

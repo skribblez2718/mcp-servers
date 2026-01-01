@@ -16,6 +16,10 @@ class ShowModelInfoOllamaShowTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "model": {
+                        "type": ["string", "null"],
+                        "description": "Name of the model to show info for"
+                    }
                 },
                 "required": []
             }
@@ -27,8 +31,14 @@ class ShowModelInfoOllamaShowTool(BaseTool):
 
 
 
-        # Build request
+        # Build request body - ModelNameForm with additionalProperties
         json_data = {}
+        if arguments.get("model") is not None:
+            json_data["model"] = arguments["model"]
+        # Pass through any additional properties
+        for key, value in arguments.items():
+            if key != "model" and value is not None:
+                json_data[key] = value
 
         response = await self.client.post("/ollama/api/show", json_data=json_data)
 

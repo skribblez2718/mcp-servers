@@ -18,10 +18,28 @@ class UpdateKnowledgeByIdKnowledgeIdUpdateTool(BaseTool):
                 "properties": {
                     "id": {
                         "type": "string",
-                        "description": ""
+                        "description": "The knowledge base ID to update"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "The name of the knowledge base"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description of the knowledge base"
+                    },
+                    "data": {
+                        "type": ["object", "null"],
+                        "additionalProperties": True,
+                        "description": "Optional additional data"
+                    },
+                    "access_control": {
+                        "type": ["object", "null"],
+                        "additionalProperties": True,
+                        "description": "Optional access control settings"
                     }
                 },
-                "required": ["id"]
+                "required": ["id", "name", "description"]
             }
         }
 
@@ -34,9 +52,17 @@ class UpdateKnowledgeByIdKnowledgeIdUpdateTool(BaseTool):
         if id:
             id = ToolInputValidator.validate_id(id, "id")
 
+        # Build request with KnowledgeForm
+        json_data = {
+            "name": arguments.get("name"),
+            "description": arguments.get("description")
+        }
 
-        # Build request
-        json_data = {}
+        # Add optional fields if provided
+        if arguments.get("data") is not None:
+            json_data["data"] = arguments.get("data")
+        if arguments.get("access_control") is not None:
+            json_data["access_control"] = arguments.get("access_control")
 
         response = await self.client.post(f"/api/v1/knowledge/{id}/update", json_data=json_data)
 

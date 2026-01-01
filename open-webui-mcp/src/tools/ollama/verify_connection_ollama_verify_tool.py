@@ -12,12 +12,14 @@ class VerifyConnectionOllamaVerifyTool(BaseTool):
         """Get MCP tool definition."""
         return {
             "name": "verify_connection_ollama_verify",
-            "description": "Verify Connection",
+            "description": "Verify Ollama Connection",
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "url": {"type": "string", "description": "Ollama server URL"},
+                    "key": {"type": ["string", "null"], "description": "Optional API key"}
                 },
-                "required": []
+                "required": ["url"]
             }
         }
 
@@ -25,10 +27,10 @@ class VerifyConnectionOllamaVerifyTool(BaseTool):
         """Execute verify_connection_ollama_verify operation."""
         self._log_execution_start(arguments)
 
-
-
         # Build request
-        json_data = {}
+        json_data = {"url": arguments["url"]}
+        if arguments.get("key") is not None:
+            json_data["key"] = arguments["key"]
 
         response = await self.client.post("/ollama/verify", json_data=json_data)
 

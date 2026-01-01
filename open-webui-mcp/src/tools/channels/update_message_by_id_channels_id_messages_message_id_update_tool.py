@@ -18,14 +18,32 @@ class UpdateMessageByIdChannelsIdMessagesMessageIdUpdateTool(BaseTool):
                 "properties": {
                     "id": {
                         "type": "string",
-                        "description": ""
+                        "description": "Channel ID"
                     },
                     "message_id": {
                         "type": "string",
-                        "description": ""
+                        "description": "Message ID"
+                    },
+                    "content": {
+                        "type": "string",
+                        "description": "Message content"
+                    },
+                    "parent_id": {
+                        "type": ["string", "null"],
+                        "description": "Parent message ID for threaded replies"
+                    },
+                    "data": {
+                        "type": ["object", "null"],
+                        "description": "Additional message data",
+                        "additionalProperties": True
+                    },
+                    "meta": {
+                        "type": ["object", "null"],
+                        "description": "Message metadata",
+                        "additionalProperties": True
                     }
                 },
-                "required": ["id", "message_id"]
+                "required": ["id", "message_id", "content"]
             }
         }
 
@@ -44,7 +62,16 @@ class UpdateMessageByIdChannelsIdMessagesMessageIdUpdateTool(BaseTool):
 
 
         # Build request
-        json_data = {}
+        json_data = {
+            "content": arguments.get("content")
+        }
+        # Add optional fields if provided
+        if arguments.get("parent_id") is not None:
+            json_data["parent_id"] = arguments.get("parent_id")
+        if arguments.get("data") is not None:
+            json_data["data"] = arguments.get("data")
+        if arguments.get("meta") is not None:
+            json_data["meta"] = arguments.get("meta")
 
         response = await self.client.post(f"/api/v1/channels/{id}/messages/{message_id}/update", json_data=json_data)
 

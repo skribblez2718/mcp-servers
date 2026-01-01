@@ -16,8 +16,16 @@ class SigninAuthsSigninTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "email": {
+                        "type": "string",
+                        "description": "User email address"
+                    },
+                    "password": {
+                        "type": "string",
+                        "description": "User password"
+                    }
                 },
-                "required": []
+                "required": ["email", "password"]
             }
         }
 
@@ -28,7 +36,10 @@ class SigninAuthsSigninTool(BaseTool):
 
 
         # Build request
-        json_data = {}
+        json_data = {
+            "email": arguments.get("email"),
+            "password": arguments.get("password")
+        }
 
         response = await self.client.post("/api/v1/auths/signin", json_data=json_data)
 

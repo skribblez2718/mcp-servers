@@ -16,8 +16,26 @@ class CreateNewKnowledgeKnowledgeCreateTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "The name of the knowledge base"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description of the knowledge base"
+                    },
+                    "data": {
+                        "type": ["object", "null"],
+                        "additionalProperties": True,
+                        "description": "Optional additional data"
+                    },
+                    "access_control": {
+                        "type": ["object", "null"],
+                        "additionalProperties": True,
+                        "description": "Optional access control settings"
+                    }
                 },
-                "required": []
+                "required": ["name", "description"]
             }
         }
 
@@ -25,10 +43,17 @@ class CreateNewKnowledgeKnowledgeCreateTool(BaseTool):
         """Execute create_new_knowledge_knowledge_create operation."""
         self._log_execution_start(arguments)
 
+        # Build request with KnowledgeForm
+        json_data = {
+            "name": arguments.get("name"),
+            "description": arguments.get("description")
+        }
 
-
-        # Build request
-        json_data = {}
+        # Add optional fields if provided
+        if arguments.get("data") is not None:
+            json_data["data"] = arguments.get("data")
+        if arguments.get("access_control") is not None:
+            json_data["access_control"] = arguments.get("access_control")
 
         response = await self.client.post("/api/v1/knowledge/create", json_data=json_data)
 

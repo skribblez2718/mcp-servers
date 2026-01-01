@@ -12,16 +12,16 @@ class PushModelOllamaPushTool(BaseTool):
         """Get MCP tool definition."""
         return {
             "name": "push_model_ollama_push",
-            "description": "Push Model",
+            "description": "Push Model to Ollama registry",
             "inputSchema": {
                 "type": "object",
                 "properties": {
-                    "url_idx": {
-                        "type": "string",
-                        "description": ""
-                    }
+                    "model": {"type": "string", "description": "Model name to push"},
+                    "insecure": {"type": ["boolean", "null"], "description": "Allow insecure connections"},
+                    "stream": {"type": ["boolean", "null"], "description": "Stream the response"},
+                    "url_idx": {"type": ["integer", "null"], "description": "URL index"}
                 },
-                "required": []
+                "required": ["model"]
             }
         }
 
@@ -29,16 +29,21 @@ class PushModelOllamaPushTool(BaseTool):
         """Execute push_model_ollama_push operation."""
         self._log_execution_start(arguments)
 
-
         # Query parameter: url_idx
         url_idx = arguments.get("url_idx")
 
-        # Build request
+        # Build request - PushModelForm
+        json_data = {"model": arguments["model"]}
+        if arguments.get("insecure") is not None:
+            json_data["insecure"] = arguments["insecure"]
+        if arguments.get("stream") is not None:
+            json_data["stream"] = arguments["stream"]
+
         params = {}
         if url_idx is not None:
             params["url_idx"] = url_idx
 
-        response = await self.client.delete("/ollama/api/push", params=params)
+        response = await self.client.delete("/ollama/api/push", json_data=json_data, params=params)
 
         self._log_execution_end(response)
         return response

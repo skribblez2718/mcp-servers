@@ -18,10 +18,14 @@ class UpdateFileFromKnowledgeByIdKnowledgeIdFileUpdateTool(BaseTool):
                 "properties": {
                     "id": {
                         "type": "string",
-                        "description": ""
+                        "description": "The knowledge base ID"
+                    },
+                    "file_id": {
+                        "type": "string",
+                        "description": "The file ID to update in the knowledge base"
                     }
                 },
-                "required": ["id"]
+                "required": ["id", "file_id"]
             }
         }
 
@@ -34,9 +38,10 @@ class UpdateFileFromKnowledgeByIdKnowledgeIdFileUpdateTool(BaseTool):
         if id:
             id = ToolInputValidator.validate_id(id, "id")
 
-
-        # Build request
-        json_data = {}
+        # Build request with KnowledgeFileIdForm
+        json_data = {
+            "file_id": arguments.get("file_id")
+        }
 
         response = await self.client.post(f"/api/v1/knowledge/{id}/file/update", json_data=json_data)
 

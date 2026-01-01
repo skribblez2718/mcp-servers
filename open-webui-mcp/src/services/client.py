@@ -502,6 +502,59 @@ class OpenWebUIClient:
             logger.error(f"Request error: {e}")
             raise HTTPError(f"Request failed: {str(e)}", status_code=0)
 
+    async def delete_with_body(
+        self,
+        endpoint: str,
+        json_data: dict[str, Any],
+        params: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None
+    ) -> dict[str, Any]:
+        """Perform DELETE request with JSON body.
+
+        Note: While RFC 7231 discourages body in DELETE, some APIs require it.
+        Open WebUI's pipelines API uses DELETE with request body.
+
+        Args:
+            endpoint: API endpoint path
+            json_data: JSON request body
+            params: Query parameters
+            headers: Additional headers
+
+        Returns:
+            Response data as dict
+
+        Raises:
+            HTTPError: On HTTP errors
+        """
+        # Apply rate limiting
+        if self.rate_limiter:
+            await self.rate_limiter.acquire()
+
+        # Build URL
+        url = endpoint if endpoint.startswith("http") else build_url(
+            self.base_url,
+            endpoint,
+            params
+        )
+
+        # Merge headers
+        request_headers = {**self._build_headers(), **(headers or {})}
+
+        logger.info(f"DELETE (with body) {url}")
+
+        try:
+            response = await self.client.request("DELETE", url, json=json_data, headers=request_headers)
+            return self._handle_response(response)
+
+        except httpx.HTTPStatusError as e:
+            raise self._transform_http_error(e)
+        except httpx.TimeoutException as e:
+            logger.error(f"Request timeout: {e}")
+            raise HTTPError("Request timeout", status_code=408)
+        except httpx.RequestError as e:
+            logger.error(f"Request error: {e}")
+            raise HTTPError(f"Request failed: {str(e)}", status_code=0)
+
     async def post_with_file(
         self,
         endpoint: str,

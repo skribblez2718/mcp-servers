@@ -17,11 +17,16 @@ class UploadModelOllamaModelsUploadTool(BaseTool):
                 "type": "object",
                 "properties": {
                     "url_idx": {
+                        "type": ["integer", "null"],
+                        "description": "Index of the Ollama URL to use"
+                    },
+                    "file": {
                         "type": "string",
-                        "description": ""
+                        "format": "binary",
+                        "description": "Model file to upload (binary data or file path)"
                     }
                 },
-                "required": []
+                "required": ["file"]
             }
         }
 
@@ -31,12 +36,16 @@ class UploadModelOllamaModelsUploadTool(BaseTool):
 
 
         # Query parameter: url_idx
+        params = {}
         url_idx = arguments.get("url_idx")
+        if url_idx is not None:
+            params["url_idx"] = url_idx
 
-        # Build request
-        json_data = {}
+        # Build request - multipart/form-data with file
+        # Note: This requires the client to handle file uploads
+        files = {"file": arguments["file"]}
 
-        response = await self.client.post("/ollama/models/upload", json_data=json_data)
+        response = await self.client.post("/ollama/models/upload", files=files, params=params)
 
         self._log_execution_end(response)
         return response

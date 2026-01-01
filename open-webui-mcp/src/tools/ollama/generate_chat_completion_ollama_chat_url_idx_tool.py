@@ -17,16 +17,49 @@ class GenerateChatCompletionOllamaChatUrlIdxTool(BaseTool):
                 "type": "object",
                 "properties": {
                     "url_idx": {
-                        "type": "string",
-                        "description": ""
+                        "type": "integer",
+                        "description": "Index of the Ollama URL to use"
                     },
                     "bypass_filter": {
-                        "type": "string",
-                        "description": "",
+                        "type": ["boolean", "null"],
+                        "description": "Bypass content filter",
                         "default": False
+                    },
+                    "model": {
+                        "type": "string",
+                        "description": "Name of the model to use"
+                    },
+                    "messages": {
+                        "type": "array",
+                        "items": {"type": "object"},
+                        "description": "Array of message objects with role and content"
+                    },
+                    "format": {
+                        "oneOf": [
+                            {"type": "object"},
+                            {"type": "string"},
+                            {"type": "null"}
+                        ],
+                        "description": "Response format (e.g., 'json')"
+                    },
+                    "options": {
+                        "type": ["object", "null"],
+                        "description": "Additional model parameters"
+                    },
+                    "stream": {
+                        "type": ["boolean", "null"],
+                        "description": "Stream the response"
+                    },
+                    "keep_alive": {
+                        "oneOf": [
+                            {"type": "integer"},
+                            {"type": "string"},
+                            {"type": "null"}
+                        ],
+                        "description": "How long to keep the model loaded"
                     }
                 },
-                "required": ["url_idx"]
+                "required": ["url_idx", "model", "messages"]
             }
         }
 
@@ -40,12 +73,26 @@ class GenerateChatCompletionOllamaChatUrlIdxTool(BaseTool):
             url_idx = ToolInputValidator.validate_id(url_idx, "url_idx")
 
         # Query parameter: bypass_filter
+        params = {}
         bypass_filter = arguments.get("bypass_filter", False)
+        if bypass_filter is not None:
+            params["bypass_filter"] = bypass_filter
 
-        # Build request
-        json_data = {}
+        # Build request body - additionalProperties object (pass through all body params)
+        json_data = {
+            "model": arguments["model"],
+            "messages": arguments["messages"]
+        }
+        optional_fields = ["format", "options", "stream", "keep_alive"]
+        for field in optional_fields:
+            if arguments.get(field) is not None:
+                json_data[field] = arguments[field]
+        # Pass through any additional properties
+        for key, value in arguments.items():
+            if key not in ["url_idx", "bypass_filter", "model", "messages", "format", "options", "stream", "keep_alive"] and value is not None:
+                json_data[key] = value
 
-        response = await self.client.post(f"/ollama/api/chat/{url_idx}", json_data=json_data)
+        response = await self.client.post(f"/ollama/api/chat/{url_idx}", json_data=json_data, params=params)
 
         self._log_execution_end(response)
         return response

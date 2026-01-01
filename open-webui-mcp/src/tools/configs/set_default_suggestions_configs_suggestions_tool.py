@@ -16,8 +16,27 @@ class SetDefaultSuggestionsConfigsSuggestionsTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "suggestions": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "title": {
+                                    "type": "array",
+                                    "items": {"type": "string"},
+                                    "description": "Array of title strings"
+                                },
+                                "content": {
+                                    "type": "string",
+                                    "description": "The suggestion content"
+                                }
+                            },
+                            "required": ["title", "content"]
+                        },
+                        "description": "Array of prompt suggestions"
+                    }
                 },
-                "required": []
+                "required": ["suggestions"]
             }
         }
 
@@ -28,7 +47,9 @@ class SetDefaultSuggestionsConfigsSuggestionsTool(BaseTool):
 
 
         # Build request
-        json_data = {}
+        json_data = {
+            "suggestions": arguments.get("suggestions", [])
+        }
 
         response = await self.client.post("/api/v1/configs/suggestions", json_data=json_data)
 

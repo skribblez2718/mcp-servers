@@ -12,12 +12,14 @@ class DeleteEntriesFromCollectionRetrievalTool(BaseTool):
         """Get MCP tool definition."""
         return {
             "name": "delete_entries_from_collection_retrieval",
-            "description": "Delete Entries From Collection",
+            "description": "Delete entries from a collection",
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "collection_name": {"type": "string", "description": "Collection name to delete from"},
+                    "file_id": {"type": "string", "description": "File ID to delete"}
                 },
-                "required": []
+                "required": ["collection_name", "file_id"]
             }
         }
 
@@ -25,10 +27,11 @@ class DeleteEntriesFromCollectionRetrievalTool(BaseTool):
         """Execute delete_entries_from_collection_retrieval operation."""
         self._log_execution_start(arguments)
 
-
-
         # Build request
-        json_data = {}
+        json_data = {
+            "collection_name": arguments["collection_name"],
+            "file_id": arguments["file_id"]
+        }
 
         response = await self.client.post("/api/v1/retrieval/delete", json_data=json_data)
 

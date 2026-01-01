@@ -16,8 +16,12 @@ class FormatCodeUtilsCodeFormatTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "code": {
+                        "type": "string",
+                        "description": "The code to format"
+                    }
                 },
-                "required": []
+                "required": ["code"]
             }
         }
 
@@ -25,10 +29,10 @@ class FormatCodeUtilsCodeFormatTool(BaseTool):
         """Execute format_code_utils_code_format operation."""
         self._log_execution_start(arguments)
 
-
-
-        # Build request
-        json_data = {}
+        # Build request body per CodeForm schema
+        json_data = {
+            "code": arguments.get("code")
+        }
 
         response = await self.client.post("/api/v1/utils/code/format", json_data=json_data)
 

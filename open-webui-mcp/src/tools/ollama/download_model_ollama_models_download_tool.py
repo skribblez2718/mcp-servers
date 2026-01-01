@@ -17,11 +17,15 @@ class DownloadModelOllamaModelsDownloadTool(BaseTool):
                 "type": "object",
                 "properties": {
                     "url_idx": {
+                        "type": ["integer", "null"],
+                        "description": "Index of the Ollama URL to use"
+                    },
+                    "url": {
                         "type": "string",
-                        "description": ""
+                        "description": "URL of the model to download"
                     }
                 },
-                "required": []
+                "required": ["url"]
             }
         }
 
@@ -31,12 +35,17 @@ class DownloadModelOllamaModelsDownloadTool(BaseTool):
 
 
         # Query parameter: url_idx
+        params = {}
         url_idx = arguments.get("url_idx")
+        if url_idx is not None:
+            params["url_idx"] = url_idx
 
-        # Build request
-        json_data = {}
+        # Build request body - UrlForm
+        json_data = {
+            "url": arguments["url"]
+        }
 
-        response = await self.client.post("/ollama/models/download", json_data=json_data)
+        response = await self.client.post("/ollama/models/download", json_data=json_data, params=params)
 
         self._log_execution_end(response)
         return response

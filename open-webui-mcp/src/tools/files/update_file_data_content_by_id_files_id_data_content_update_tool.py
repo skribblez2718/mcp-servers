@@ -18,10 +18,14 @@ class UpdateFileDataContentByIdFilesIdDataContentUpdateTool(BaseTool):
                 "properties": {
                     "id": {
                         "type": "string",
-                        "description": ""
+                        "description": "The file ID to update"
+                    },
+                    "content": {
+                        "type": "string",
+                        "description": "The new content for the file"
                     }
                 },
-                "required": ["id"]
+                "required": ["id", "content"]
             }
         }
 
@@ -36,7 +40,9 @@ class UpdateFileDataContentByIdFilesIdDataContentUpdateTool(BaseTool):
 
 
         # Build request
-        json_data = {}
+        json_data = {
+            "content": arguments["content"]
+        }
 
         response = await self.client.post(f"/api/v1/files/{id}/data/content/update", json_data=json_data)
 

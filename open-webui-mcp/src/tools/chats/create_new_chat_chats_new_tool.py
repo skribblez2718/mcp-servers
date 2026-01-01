@@ -16,8 +16,17 @@ class CreateNewChatChatsNewTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "chat": {
+                        "type": "object",
+                        "additionalProperties": True,
+                        "description": "Chat data object"
+                    },
+                    "folder_id": {
+                        "type": ["string", "null"],
+                        "description": "Optional folder ID to place the chat in"
+                    }
                 },
-                "required": []
+                "required": ["chat"]
             }
         }
 
@@ -25,10 +34,10 @@ class CreateNewChatChatsNewTool(BaseTool):
         """Execute create_new_chat_chats_new operation."""
         self._log_execution_start(arguments)
 
-
-
         # Build request
-        json_data = {}
+        json_data = {"chat": arguments["chat"]}
+        if arguments.get("folder_id") is not None:
+            json_data["folder_id"] = arguments["folder_id"]
 
         response = await self.client.post("/api/v1/chats/new", json_data=json_data)
 

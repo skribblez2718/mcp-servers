@@ -18,10 +18,42 @@ class UpdateToolsByIdToolsIdIdUpdateTool(BaseTool):
                 "properties": {
                     "id": {
                         "type": "string",
-                        "description": ""
+                        "description": "The tool ID (path parameter)"
+                    },
+                    "tool_id": {
+                        "type": "string",
+                        "description": "The tool ID in the body (usually same as path id)"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "The tool name"
+                    },
+                    "content": {
+                        "type": "string",
+                        "description": "The tool content/code"
+                    },
+                    "meta": {
+                        "type": "object",
+                        "description": "Tool metadata with optional description and manifest",
+                        "properties": {
+                            "description": {
+                                "type": ["string", "null"],
+                                "description": "Tool description"
+                            },
+                            "manifest": {
+                                "type": ["object", "null"],
+                                "additionalProperties": True,
+                                "description": "Tool manifest"
+                            }
+                        }
+                    },
+                    "access_control": {
+                        "type": ["object", "null"],
+                        "additionalProperties": True,
+                        "description": "Optional access control settings"
                     }
                 },
-                "required": ["id"]
+                "required": ["id", "tool_id", "name", "content", "meta"]
             }
         }
 
@@ -34,9 +66,17 @@ class UpdateToolsByIdToolsIdIdUpdateTool(BaseTool):
         if id:
             id = ToolInputValidator.validate_id(id, "id")
 
+        # Build request - ToolForm body
+        json_data = {
+            "id": arguments.get("tool_id"),
+            "name": arguments.get("name"),
+            "content": arguments.get("content"),
+            "meta": arguments.get("meta", {})
+        }
 
-        # Build request
-        json_data = {}
+        # Optional access_control
+        if arguments.get("access_control") is not None:
+            json_data["access_control"] = arguments.get("access_control")
 
         response = await self.client.post(f"/api/v1/tools/id/{id}/update", json_data=json_data)
 

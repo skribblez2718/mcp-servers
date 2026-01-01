@@ -16,8 +16,16 @@ class UpdateProfileAuthsUpdateProfileTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "profile_image_url": {
+                        "type": "string",
+                        "description": "URL to user's profile image"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "User display name"
+                    }
                 },
-                "required": []
+                "required": ["profile_image_url", "name"]
             }
         }
 
@@ -28,7 +36,10 @@ class UpdateProfileAuthsUpdateProfileTool(BaseTool):
 
 
         # Build request
-        json_data = {}
+        json_data = {
+            "profile_image_url": arguments.get("profile_image_url"),
+            "name": arguments.get("name")
+        }
 
         response = await self.client.post("/api/v1/auths/update/profile", json_data=json_data)
 

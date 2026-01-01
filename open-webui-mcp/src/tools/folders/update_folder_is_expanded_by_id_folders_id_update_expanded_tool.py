@@ -18,10 +18,14 @@ class UpdateFolderIsExpandedByIdFoldersIdUpdateExpandedTool(BaseTool):
                 "properties": {
                     "id": {
                         "type": "string",
-                        "description": ""
+                        "description": "The folder ID to update"
+                    },
+                    "is_expanded": {
+                        "type": "boolean",
+                        "description": "Whether the folder should be expanded in the UI"
                     }
                 },
-                "required": ["id"]
+                "required": ["id", "is_expanded"]
             }
         }
 
@@ -34,9 +38,10 @@ class UpdateFolderIsExpandedByIdFoldersIdUpdateExpandedTool(BaseTool):
         if id:
             id = ToolInputValidator.validate_id(id, "id")
 
-
-        # Build request
-        json_data = {}
+        # Build request with FolderIsExpandedForm schema
+        json_data = {
+            "is_expanded": arguments.get("is_expanded")
+        }
 
         response = await self.client.post(f"/api/v1/folders/{id}/update/expanded", json_data=json_data)
 

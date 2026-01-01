@@ -16,8 +16,12 @@ class ExecuteCodeUtilsCodeExecuteTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "code": {
+                        "type": "string",
+                        "description": "The code to execute"
+                    }
                 },
-                "required": []
+                "required": ["code"]
             }
         }
 
@@ -25,10 +29,10 @@ class ExecuteCodeUtilsCodeExecuteTool(BaseTool):
         """Execute execute_code_utils_code_execute operation."""
         self._log_execution_start(arguments)
 
-
-
-        # Build request
-        json_data = {}
+        # Build request body per CodeForm schema
+        json_data = {
+            "code": arguments.get("code")
+        }
 
         response = await self.client.post("/api/v1/utils/code/execute", json_data=json_data)
 

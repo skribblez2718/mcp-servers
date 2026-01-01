@@ -18,7 +18,12 @@ class RemoveUsersFromGroupGroupsIdIdUsersRemoveTool(BaseTool):
                 "properties": {
                     "id": {
                         "type": "string",
-                        "description": ""
+                        "description": "The group ID to remove users from"
+                    },
+                    "user_ids": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "List of user IDs to remove from the group"
                     }
                 },
                 "required": ["id"]
@@ -34,9 +39,10 @@ class RemoveUsersFromGroupGroupsIdIdUsersRemoveTool(BaseTool):
         if id:
             id = ToolInputValidator.validate_id(id, "id")
 
-
-        # Build request
+        # Build request with UserIdsForm schema
         json_data = {}
+        if arguments.get("user_ids"):
+            json_data["user_ids"] = arguments.get("user_ids")
 
         response = await self.client.post(f"/api/v1/groups/id/{id}/users/remove", json_data=json_data)
 

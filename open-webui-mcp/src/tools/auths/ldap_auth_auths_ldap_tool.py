@@ -16,8 +16,16 @@ class LdapAuthAuthsLdapTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "user": {
+                        "type": "string",
+                        "description": "LDAP username"
+                    },
+                    "password": {
+                        "type": "string",
+                        "description": "LDAP password"
+                    }
                 },
-                "required": []
+                "required": ["user", "password"]
             }
         }
 
@@ -28,7 +36,10 @@ class LdapAuthAuthsLdapTool(BaseTool):
 
 
         # Build request
-        json_data = {}
+        json_data = {
+            "user": arguments.get("user"),
+            "password": arguments.get("password")
+        }
 
         response = await self.client.post("/api/v1/auths/ldap", json_data=json_data)
 

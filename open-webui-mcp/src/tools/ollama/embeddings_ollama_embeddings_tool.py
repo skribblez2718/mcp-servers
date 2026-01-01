@@ -17,11 +17,31 @@ class EmbeddingsOllamaEmbeddingsTool(BaseTool):
                 "type": "object",
                 "properties": {
                     "url_idx": {
+                        "type": ["integer", "null"],
+                        "description": "Index of the Ollama URL to use"
+                    },
+                    "model": {
                         "type": "string",
-                        "description": ""
+                        "description": "Name of the model to use for embeddings"
+                    },
+                    "prompt": {
+                        "type": "string",
+                        "description": "Text to generate embeddings for"
+                    },
+                    "options": {
+                        "type": ["object", "null"],
+                        "description": "Additional model options"
+                    },
+                    "keep_alive": {
+                        "oneOf": [
+                            {"type": "integer"},
+                            {"type": "string"},
+                            {"type": "null"}
+                        ],
+                        "description": "How long to keep the model loaded"
                     }
                 },
-                "required": []
+                "required": ["model", "prompt"]
             }
         }
 
@@ -32,11 +52,21 @@ class EmbeddingsOllamaEmbeddingsTool(BaseTool):
 
         # Query parameter: url_idx
         url_idx = arguments.get("url_idx")
+        params = {}
+        if url_idx is not None:
+            params["url_idx"] = url_idx
 
-        # Build request
-        json_data = {}
+        # Build request body - GenerateEmbeddingsForm
+        json_data = {
+            "model": arguments["model"],
+            "prompt": arguments["prompt"]
+        }
+        if arguments.get("options") is not None:
+            json_data["options"] = arguments["options"]
+        if arguments.get("keep_alive") is not None:
+            json_data["keep_alive"] = arguments["keep_alive"]
 
-        response = await self.client.post("/ollama/api/embeddings", json_data=json_data)
+        response = await self.client.post("/ollama/api/embeddings", json_data=json_data, params=params)
 
         self._log_execution_end(response)
         return response

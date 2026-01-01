@@ -18,7 +18,11 @@ class UpdateChatFolderIdByIdChatsIdFolderTool(BaseTool):
                 "properties": {
                     "id": {
                         "type": "string",
-                        "description": ""
+                        "description": "Chat ID"
+                    },
+                    "folder_id": {
+                        "type": ["string", "null"],
+                        "description": "Folder ID to move the chat to (null to remove from folder)"
                     }
                 },
                 "required": ["id"]
@@ -34,9 +38,10 @@ class UpdateChatFolderIdByIdChatsIdFolderTool(BaseTool):
         if id:
             id = ToolInputValidator.validate_id(id, "id")
 
-
         # Build request
         json_data = {}
+        if "folder_id" in arguments:
+            json_data["folder_id"] = arguments["folder_id"]
 
         response = await self.client.post(f"/api/v1/chats/{id}/folder", json_data=json_data)
 

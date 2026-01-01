@@ -16,8 +16,35 @@ class CreateNewFunctionFunctionsCreateTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "The function ID"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "The function name"
+                    },
+                    "content": {
+                        "type": "string",
+                        "description": "The function content/code"
+                    },
+                    "meta": {
+                        "type": "object",
+                        "description": "Function metadata with optional description and manifest",
+                        "properties": {
+                            "description": {
+                                "type": ["string", "null"],
+                                "description": "Function description"
+                            },
+                            "manifest": {
+                                "type": ["object", "null"],
+                                "additionalProperties": True,
+                                "description": "Function manifest"
+                            }
+                        }
+                    }
                 },
-                "required": []
+                "required": ["id", "name", "content", "meta"]
             }
         }
 
@@ -25,10 +52,13 @@ class CreateNewFunctionFunctionsCreateTool(BaseTool):
         """Execute create_new_function_functions_create operation."""
         self._log_execution_start(arguments)
 
-
-
-        # Build request
-        json_data = {}
+        # Build request with FunctionForm schema
+        json_data = {
+            "id": arguments.get("id"),
+            "name": arguments.get("name"),
+            "content": arguments.get("content"),
+            "meta": arguments.get("meta", {})
+        }
 
         response = await self.client.post("/api/v1/functions/create", json_data=json_data)
 

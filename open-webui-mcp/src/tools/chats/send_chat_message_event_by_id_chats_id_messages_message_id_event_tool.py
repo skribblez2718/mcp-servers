@@ -18,14 +18,23 @@ class SendChatMessageEventByIdChatsIdMessagesMessageIdEventTool(BaseTool):
                 "properties": {
                     "id": {
                         "type": "string",
-                        "description": ""
+                        "description": "Chat ID"
                     },
                     "message_id": {
                         "type": "string",
-                        "description": ""
+                        "description": "Message ID"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "Event type"
+                    },
+                    "data": {
+                        "type": "object",
+                        "additionalProperties": True,
+                        "description": "Event data object"
                     }
                 },
-                "required": ["id", "message_id"]
+                "required": ["id", "message_id", "type", "data"]
             }
         }
 
@@ -42,9 +51,11 @@ class SendChatMessageEventByIdChatsIdMessagesMessageIdEventTool(BaseTool):
         if message_id:
             message_id = ToolInputValidator.validate_id(message_id, "message_id")
 
-
         # Build request
-        json_data = {}
+        json_data = {
+            "type": arguments["type"],
+            "data": arguments["data"]
+        }
 
         response = await self.client.post(f"/api/v1/chats/{id}/messages/{message_id}/event", json_data=json_data)
 

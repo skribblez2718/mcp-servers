@@ -16,8 +16,11 @@ class VerifyConnectionOpenaiVerifyTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "url": {"type": "string", "description": "The OpenAI API base URL to verify"},
+                    "key": {"type": "string", "description": "The API key to verify"},
+                    "config": {"type": "object", "additionalProperties": True, "description": "Optional additional configuration"}
                 },
-                "required": []
+                "required": ["url", "key"]
             }
         }
 
@@ -28,7 +31,12 @@ class VerifyConnectionOpenaiVerifyTool(BaseTool):
 
 
         # Build request
-        json_data = {}
+        json_data = {
+            "url": arguments.get("url"),
+            "key": arguments.get("key")
+        }
+        if arguments.get("config"):
+            json_data["config"] = arguments.get("config")
 
         response = await self.client.post("/openai/verify", json_data=json_data)
 

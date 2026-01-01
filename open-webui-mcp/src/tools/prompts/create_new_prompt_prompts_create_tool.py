@@ -16,8 +16,25 @@ class CreateNewPromptPromptsCreateTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "command": {
+                        "type": "string",
+                        "description": "The command/shortcut for the prompt (e.g., 'summarize')"
+                    },
+                    "title": {
+                        "type": "string",
+                        "description": "The title of the prompt"
+                    },
+                    "content": {
+                        "type": "string",
+                        "description": "The prompt content/template"
+                    },
+                    "access_control": {
+                        "type": "object",
+                        "description": "Optional access control settings",
+                        "additionalProperties": True
+                    }
                 },
-                "required": []
+                "required": ["command", "title", "content"]
             }
         }
 
@@ -25,10 +42,15 @@ class CreateNewPromptPromptsCreateTool(BaseTool):
         """Execute create_new_prompt_prompts_create operation."""
         self._log_execution_start(arguments)
 
-
-
-        # Build request
-        json_data = {}
+        # Build request body per PromptForm schema
+        json_data = {
+            "command": arguments.get("command"),
+            "title": arguments.get("title"),
+            "content": arguments.get("content")
+        }
+        # Add optional access_control if provided
+        if arguments.get("access_control") is not None:
+            json_data["access_control"] = arguments.get("access_control")
 
         response = await self.client.post("/api/v1/prompts/create", json_data=json_data)
 

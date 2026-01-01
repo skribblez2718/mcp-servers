@@ -17,11 +17,44 @@ class GenerateOpenaiChatCompletionOllamaV1ChatCompletionsUrlIdxTool(BaseTool):
                 "type": "object",
                 "properties": {
                     "url_idx": {
+                        "type": "integer",
+                        "description": "Index of the Ollama URL to use"
+                    },
+                    "model": {
                         "type": "string",
-                        "description": ""
+                        "description": "Name of the model to use"
+                    },
+                    "messages": {
+                        "type": "array",
+                        "items": {"type": "object"},
+                        "description": "Array of message objects with role and content"
+                    },
+                    "max_tokens": {
+                        "type": ["integer", "null"],
+                        "description": "Maximum tokens to generate"
+                    },
+                    "temperature": {
+                        "type": ["number", "null"],
+                        "description": "Sampling temperature"
+                    },
+                    "top_p": {
+                        "type": ["number", "null"],
+                        "description": "Nucleus sampling parameter"
+                    },
+                    "stream": {
+                        "type": ["boolean", "null"],
+                        "description": "Stream the response"
+                    },
+                    "stop": {
+                        "oneOf": [
+                            {"type": "string"},
+                            {"type": "array", "items": {"type": "string"}},
+                            {"type": "null"}
+                        ],
+                        "description": "Stop sequences"
                     }
                 },
-                "required": ["url_idx"]
+                "required": ["url_idx", "model", "messages"]
             }
         }
 
@@ -35,8 +68,19 @@ class GenerateOpenaiChatCompletionOllamaV1ChatCompletionsUrlIdxTool(BaseTool):
             url_idx = ToolInputValidator.validate_id(url_idx, "url_idx")
 
 
-        # Build request
-        json_data = {}
+        # Build request body - additionalProperties object
+        json_data = {
+            "model": arguments["model"],
+            "messages": arguments["messages"]
+        }
+        optional_fields = ["max_tokens", "temperature", "top_p", "stream", "stop"]
+        for field in optional_fields:
+            if arguments.get(field) is not None:
+                json_data[field] = arguments[field]
+        # Pass through any additional properties
+        for key, value in arguments.items():
+            if key not in ["url_idx", "model", "messages", "max_tokens", "temperature", "top_p", "stream", "stop"] and value is not None:
+                json_data[key] = value
 
         response = await self.client.post(f"/ollama/v1/chat/completions/{url_idx}", json_data=json_data)
 

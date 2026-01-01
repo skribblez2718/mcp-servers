@@ -16,8 +16,29 @@ class VerifyToolServersConfigConfigsToolServersVerifyTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "url": {
+                        "type": "string",
+                        "description": "The URL of the tool server"
+                    },
+                    "path": {
+                        "type": "string",
+                        "description": "The path on the tool server"
+                    },
+                    "auth_type": {
+                        "type": ["string", "null"],
+                        "description": "The authentication type (optional)"
+                    },
+                    "key": {
+                        "type": ["string", "null"],
+                        "description": "The authentication key (optional)"
+                    },
+                    "config": {
+                        "type": ["object", "null"],
+                        "additionalProperties": True,
+                        "description": "Additional configuration (optional)"
+                    }
                 },
-                "required": []
+                "required": ["url", "path", "auth_type", "key", "config"]
             }
         }
 
@@ -28,7 +49,13 @@ class VerifyToolServersConfigConfigsToolServersVerifyTool(BaseTool):
 
 
         # Build request
-        json_data = {}
+        json_data = {
+            "url": arguments.get("url"),
+            "path": arguments.get("path"),
+            "auth_type": arguments.get("auth_type"),
+            "key": arguments.get("key"),
+            "config": arguments.get("config")
+        }
 
         response = await self.client.post("/api/v1/configs/tool_servers/verify", json_data=json_data)
 

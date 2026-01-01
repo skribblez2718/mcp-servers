@@ -18,10 +18,14 @@ class AddTagByIdAndTagNameChatsIdTagsTool(BaseTool):
                 "properties": {
                     "id": {
                         "type": "string",
-                        "description": ""
+                        "description": "Chat ID"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Tag name to add"
                     }
                 },
-                "required": ["id"]
+                "required": ["id", "name"]
             }
         }
 
@@ -34,9 +38,8 @@ class AddTagByIdAndTagNameChatsIdTagsTool(BaseTool):
         if id:
             id = ToolInputValidator.validate_id(id, "id")
 
-
         # Build request
-        json_data = {}
+        json_data = {"name": arguments["name"]}
 
         response = await self.client.post(f"/api/v1/chats/{id}/tags", json_data=json_data)
 

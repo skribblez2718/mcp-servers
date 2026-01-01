@@ -18,14 +18,18 @@ class UpdateChatMessageByIdChatsIdMessagesMessageIdTool(BaseTool):
                 "properties": {
                     "id": {
                         "type": "string",
-                        "description": ""
+                        "description": "Chat ID"
                     },
                     "message_id": {
                         "type": "string",
-                        "description": ""
+                        "description": "Message ID"
+                    },
+                    "content": {
+                        "type": "string",
+                        "description": "Message content"
                     }
                 },
-                "required": ["id", "message_id"]
+                "required": ["id", "message_id", "content"]
             }
         }
 
@@ -42,9 +46,8 @@ class UpdateChatMessageByIdChatsIdMessagesMessageIdTool(BaseTool):
         if message_id:
             message_id = ToolInputValidator.validate_id(message_id, "message_id")
 
-
         # Build request
-        json_data = {}
+        json_data = {"content": arguments["content"]}
 
         response = await self.client.post(f"/api/v1/chats/{id}/messages/{message_id}", json_data=json_data)
 

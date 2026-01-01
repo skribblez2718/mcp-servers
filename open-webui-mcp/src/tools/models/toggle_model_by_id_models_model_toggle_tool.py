@@ -36,7 +36,7 @@ class ToggleModelByIdModelsModelToggleTool(BaseTool):
         # Build request
         json_data = {}
 
-        response = await self.client.post("/api/v1/models/model/toggle", json_data=json_data)
+        response = await self.client.post("/api/v1/models/model/toggle", params={"id": id}, json_data=json_data)
 
         self._log_execution_end(response)
         return response

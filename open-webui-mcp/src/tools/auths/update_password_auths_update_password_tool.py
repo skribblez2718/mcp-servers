@@ -16,8 +16,16 @@ class UpdatePasswordAuthsUpdatePasswordTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "password": {
+                        "type": "string",
+                        "description": "Current password"
+                    },
+                    "new_password": {
+                        "type": "string",
+                        "description": "New password to set"
+                    }
                 },
-                "required": []
+                "required": ["password", "new_password"]
             }
         }
 
@@ -28,7 +36,10 @@ class UpdatePasswordAuthsUpdatePasswordTool(BaseTool):
 
 
         # Build request
-        json_data = {}
+        json_data = {
+            "password": arguments.get("password"),
+            "new_password": arguments.get("new_password")
+        }
 
         response = await self.client.post("/api/v1/auths/update/password", json_data=json_data)
 

@@ -18,10 +18,19 @@ class UpdateChatByIdChatsIdTool(BaseTool):
                 "properties": {
                     "id": {
                         "type": "string",
-                        "description": ""
+                        "description": "Chat ID"
+                    },
+                    "chat": {
+                        "type": "object",
+                        "additionalProperties": True,
+                        "description": "Chat data object"
+                    },
+                    "folder_id": {
+                        "type": ["string", "null"],
+                        "description": "Optional folder ID to place the chat in"
                     }
                 },
-                "required": ["id"]
+                "required": ["id", "chat"]
             }
         }
 
@@ -34,9 +43,10 @@ class UpdateChatByIdChatsIdTool(BaseTool):
         if id:
             id = ToolInputValidator.validate_id(id, "id")
 
-
         # Build request
-        json_data = {}
+        json_data = {"chat": arguments["chat"]}
+        if arguments.get("folder_id") is not None:
+            json_data["folder_id"] = arguments["folder_id"]
 
         response = await self.client.post(f"/api/v1/chats/{id}", json_data=json_data)
 

@@ -16,8 +16,12 @@ class GetHtmlFromMarkdownUtilsMarkdownTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "md": {
+                        "type": "string",
+                        "description": "The markdown content to convert to HTML"
+                    }
                 },
-                "required": []
+                "required": ["md"]
             }
         }
 
@@ -25,10 +29,10 @@ class GetHtmlFromMarkdownUtilsMarkdownTool(BaseTool):
         """Execute get_html_from_markdown_utils_markdown operation."""
         self._log_execution_start(arguments)
 
-
-
-        # Build request
-        json_data = {}
+        # Build request body per MarkdownForm schema
+        json_data = {
+            "md": arguments.get("md")
+        }
 
         response = await self.client.post("/api/v1/utils/markdown", json_data=json_data)
 

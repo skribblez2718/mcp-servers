@@ -18,10 +18,30 @@ class UpdateUserByIdUsersUserIdUpdateTool(BaseTool):
                 "properties": {
                     "user_id": {
                         "type": "string",
-                        "description": ""
+                        "description": "The user ID to update (path parameter)"
+                    },
+                    "role": {
+                        "type": "string",
+                        "description": "User role (e.g., 'admin', 'user', 'pending')"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "User display name"
+                    },
+                    "email": {
+                        "type": "string",
+                        "description": "User email address"
+                    },
+                    "profile_image_url": {
+                        "type": "string",
+                        "description": "URL to user's profile image"
+                    },
+                    "password": {
+                        "type": ["string", "null"],
+                        "description": "New password (optional)"
                     }
                 },
-                "required": ["user_id"]
+                "required": ["user_id", "role", "name", "email", "profile_image_url"]
             }
         }
 
@@ -34,9 +54,15 @@ class UpdateUserByIdUsersUserIdUpdateTool(BaseTool):
         if user_id:
             user_id = ToolInputValidator.validate_id(user_id, "user_id")
 
-
         # Build request
-        json_data = {}
+        json_data = {
+            "role": arguments.get("role"),
+            "name": arguments.get("name"),
+            "email": arguments.get("email"),
+            "profile_image_url": arguments.get("profile_image_url")
+        }
+        if arguments.get("password") is not None:
+            json_data["password"] = arguments.get("password")
 
         response = await self.client.post(f"/api/v1/users/{user_id}/update", json_data=json_data)
 

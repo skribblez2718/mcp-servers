@@ -16,8 +16,16 @@ class DeletePipelinePipelinesTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "The ID of the pipeline to delete"
+                    },
+                    "urlIdx": {
+                        "type": "integer",
+                        "description": "The URL index of the pipeline server"
+                    }
                 },
-                "required": []
+                "required": ["id", "urlIdx"]
             }
         }
 
@@ -25,12 +33,13 @@ class DeletePipelinePipelinesTool(BaseTool):
         """Execute delete_pipeline_pipelines operation."""
         self._log_execution_start(arguments)
 
+        # Build request - DELETE with JSON body
+        json_data = {
+            "id": arguments.get("id"),
+            "urlIdx": arguments.get("urlIdx")
+        }
 
-
-        # Build request
-        params = {}
-
-        response = await self.client.delete("/api/v1/pipelines/delete", params=params)
+        response = await self.client.delete_with_body("/api/v1/pipelines/delete", json_data=json_data)
 
         self._log_execution_end(response)
         return response

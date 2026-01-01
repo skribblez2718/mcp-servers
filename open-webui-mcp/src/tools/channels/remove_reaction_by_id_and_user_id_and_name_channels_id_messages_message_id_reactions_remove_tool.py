@@ -18,14 +18,18 @@ class RemoveReactionByIdAndUserIdAndNameChannelsIdMessagesMessageIdReactionsRemo
                 "properties": {
                     "id": {
                         "type": "string",
-                        "description": ""
+                        "description": "Channel ID"
                     },
                     "message_id": {
                         "type": "string",
-                        "description": ""
+                        "description": "Message ID"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Reaction name to remove"
                     }
                 },
-                "required": ["id", "message_id"]
+                "required": ["id", "message_id", "name"]
             }
         }
 
@@ -44,7 +48,9 @@ class RemoveReactionByIdAndUserIdAndNameChannelsIdMessagesMessageIdReactionsRemo
 
 
         # Build request
-        json_data = {}
+        json_data = {
+            "name": arguments.get("name")
+        }
 
         response = await self.client.post(f"/api/v1/channels/{id}/messages/{message_id}/reactions/remove", json_data=json_data)
 

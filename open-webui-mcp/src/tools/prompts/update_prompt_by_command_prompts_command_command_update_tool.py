@@ -18,10 +18,27 @@ class UpdatePromptByCommandPromptsCommandCommandUpdateTool(BaseTool):
                 "properties": {
                     "command": {
                         "type": "string",
-                        "description": ""
+                        "description": "The command/shortcut of the prompt to update (path parameter)"
+                    },
+                    "new_command": {
+                        "type": "string",
+                        "description": "The new command/shortcut for the prompt"
+                    },
+                    "title": {
+                        "type": "string",
+                        "description": "The new title for the prompt"
+                    },
+                    "content": {
+                        "type": "string",
+                        "description": "The new prompt content/template"
+                    },
+                    "access_control": {
+                        "type": "object",
+                        "description": "Optional access control settings",
+                        "additionalProperties": True
                     }
                 },
-                "required": ["command"]
+                "required": ["command", "new_command", "title", "content"]
             }
         }
 
@@ -34,9 +51,15 @@ class UpdatePromptByCommandPromptsCommandCommandUpdateTool(BaseTool):
         if command:
             command = ToolInputValidator.validate_id(command, "command")
 
-
-        # Build request
-        json_data = {}
+        # Build request body per PromptForm schema
+        json_data = {
+            "command": arguments.get("new_command"),
+            "title": arguments.get("title"),
+            "content": arguments.get("content")
+        }
+        # Add optional access_control if provided
+        if arguments.get("access_control") is not None:
+            json_data["access_control"] = arguments.get("access_control")
 
         response = await self.client.post(f"/api/v1/prompts/command/{command}/update", json_data=json_data)
 

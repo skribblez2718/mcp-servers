@@ -18,7 +18,12 @@ class UpdateFunctionUserValvesByIdFunctionsIdIdValvesUserUpdateTool(BaseTool):
                 "properties": {
                     "id": {
                         "type": "string",
-                        "description": ""
+                        "description": "The function ID (path parameter)"
+                    },
+                    "valves": {
+                        "type": "object",
+                        "additionalProperties": True,
+                        "description": "The user valve configuration data to update"
                     }
                 },
                 "required": ["id"]
@@ -34,9 +39,12 @@ class UpdateFunctionUserValvesByIdFunctionsIdIdValvesUserUpdateTool(BaseTool):
         if id:
             id = ToolInputValidator.validate_id(id, "id")
 
-
-        # Build request
-        json_data = {}
+        # Build request - valves is a generic object with additionalProperties
+        # If valves object provided, use it; otherwise use any other arguments as the body
+        json_data = arguments.get("valves", {})
+        if not json_data:
+            # Allow passing valve data directly without wrapping
+            json_data = {k: v for k, v in arguments.items() if k != "id"}
 
         response = await self.client.post(f"/api/v1/functions/id/{id}/valves/user/update", json_data=json_data)
 

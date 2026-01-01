@@ -16,8 +16,30 @@ class AddUserAuthsAddTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "User display name"
+                    },
+                    "email": {
+                        "type": "string",
+                        "description": "User email address"
+                    },
+                    "password": {
+                        "type": "string",
+                        "description": "User password"
+                    },
+                    "profile_image_url": {
+                        "type": ["string", "null"],
+                        "description": "URL to user's profile image",
+                        "default": "/user.png"
+                    },
+                    "role": {
+                        "type": ["string", "null"],
+                        "description": "User role (e.g., 'admin', 'user', 'pending')",
+                        "default": "pending"
+                    }
                 },
-                "required": []
+                "required": ["name", "email", "password"]
             }
         }
 
@@ -28,7 +50,16 @@ class AddUserAuthsAddTool(BaseTool):
 
 
         # Build request
-        json_data = {}
+        json_data = {
+            "name": arguments.get("name"),
+            "email": arguments.get("email"),
+            "password": arguments.get("password")
+        }
+        # Add optional fields if provided
+        if arguments.get("profile_image_url") is not None:
+            json_data["profile_image_url"] = arguments.get("profile_image_url")
+        if arguments.get("role") is not None:
+            json_data["role"] = arguments.get("role")
 
         response = await self.client.post("/api/v1/auths/add", json_data=json_data)
 

@@ -18,10 +18,37 @@ class UpdateFunctionByIdFunctionsIdIdUpdateTool(BaseTool):
                 "properties": {
                     "id": {
                         "type": "string",
-                        "description": ""
+                        "description": "The function ID (path parameter)"
+                    },
+                    "function_id": {
+                        "type": "string",
+                        "description": "The function ID in the body (usually same as path id)"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "The function name"
+                    },
+                    "content": {
+                        "type": "string",
+                        "description": "The function content/code"
+                    },
+                    "meta": {
+                        "type": "object",
+                        "description": "Function metadata with optional description and manifest",
+                        "properties": {
+                            "description": {
+                                "type": ["string", "null"],
+                                "description": "Function description"
+                            },
+                            "manifest": {
+                                "type": ["object", "null"],
+                                "additionalProperties": True,
+                                "description": "Function manifest"
+                            }
+                        }
                     }
                 },
-                "required": ["id"]
+                "required": ["id", "function_id", "name", "content", "meta"]
             }
         }
 
@@ -34,9 +61,13 @@ class UpdateFunctionByIdFunctionsIdIdUpdateTool(BaseTool):
         if id:
             id = ToolInputValidator.validate_id(id, "id")
 
-
-        # Build request
-        json_data = {}
+        # Build request with FunctionForm schema
+        json_data = {
+            "id": arguments.get("function_id"),
+            "name": arguments.get("name"),
+            "content": arguments.get("content"),
+            "meta": arguments.get("meta", {})
+        }
 
         response = await self.client.post(f"/api/v1/functions/id/{id}/update", json_data=json_data)
 

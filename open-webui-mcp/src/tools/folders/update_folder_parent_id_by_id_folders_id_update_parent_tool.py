@@ -18,7 +18,11 @@ class UpdateFolderParentIdByIdFoldersIdUpdateParentTool(BaseTool):
                 "properties": {
                     "id": {
                         "type": "string",
-                        "description": ""
+                        "description": "The folder ID to update"
+                    },
+                    "parent_id": {
+                        "type": "string",
+                        "description": "The new parent folder ID (null for root level)"
                     }
                 },
                 "required": ["id"]
@@ -34,9 +38,10 @@ class UpdateFolderParentIdByIdFoldersIdUpdateParentTool(BaseTool):
         if id:
             id = ToolInputValidator.validate_id(id, "id")
 
-
-        # Build request
+        # Build request with FolderParentIdForm schema
         json_data = {}
+        if "parent_id" in arguments:
+            json_data["parent_id"] = arguments.get("parent_id")
 
         response = await self.client.post(f"/api/v1/folders/{id}/update/parent", json_data=json_data)
 

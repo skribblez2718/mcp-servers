@@ -16,8 +16,40 @@ class CreateNewToolsToolsCreateTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "The tool ID"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "The tool name"
+                    },
+                    "content": {
+                        "type": "string",
+                        "description": "The tool content/code"
+                    },
+                    "meta": {
+                        "type": "object",
+                        "description": "Tool metadata with optional description and manifest",
+                        "properties": {
+                            "description": {
+                                "type": ["string", "null"],
+                                "description": "Tool description"
+                            },
+                            "manifest": {
+                                "type": ["object", "null"],
+                                "additionalProperties": True,
+                                "description": "Tool manifest"
+                            }
+                        }
+                    },
+                    "access_control": {
+                        "type": ["object", "null"],
+                        "additionalProperties": True,
+                        "description": "Optional access control settings"
+                    }
                 },
-                "required": []
+                "required": ["id", "name", "content", "meta"]
             }
         }
 
@@ -25,10 +57,17 @@ class CreateNewToolsToolsCreateTool(BaseTool):
         """Execute create_new_tools_tools_create operation."""
         self._log_execution_start(arguments)
 
+        # Build request - ToolForm
+        json_data = {
+            "id": arguments.get("id"),
+            "name": arguments.get("name"),
+            "content": arguments.get("content"),
+            "meta": arguments.get("meta", {})
+        }
 
-
-        # Build request
-        json_data = {}
+        # Optional access_control
+        if arguments.get("access_control") is not None:
+            json_data["access_control"] = arguments.get("access_control")
 
         response = await self.client.post("/api/v1/tools/create", json_data=json_data)
 

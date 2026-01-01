@@ -18,10 +18,17 @@ class AddFilesToKnowledgeBatchKnowledgeIdFilesBatchAddTool(BaseTool):
                 "properties": {
                     "id": {
                         "type": "string",
-                        "description": ""
+                        "description": "The knowledge base ID"
+                    },
+                    "file_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Array of file IDs to add to the knowledge base"
                     }
                 },
-                "required": ["id"]
+                "required": ["id", "file_ids"]
             }
         }
 
@@ -34,9 +41,9 @@ class AddFilesToKnowledgeBatchKnowledgeIdFilesBatchAddTool(BaseTool):
         if id:
             id = ToolInputValidator.validate_id(id, "id")
 
-
-        # Build request
-        json_data = {}
+        # Build request - array of KnowledgeFileIdForm objects
+        file_ids = arguments.get("file_ids", [])
+        json_data = [{"file_id": fid} for fid in file_ids]
 
         response = await self.client.post(f"/api/v1/knowledge/{id}/files/batch/add", json_data=json_data)
 

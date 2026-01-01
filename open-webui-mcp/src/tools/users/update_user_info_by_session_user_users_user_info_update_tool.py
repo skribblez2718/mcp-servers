@@ -15,8 +15,8 @@ class UpdateUserInfoBySessionUserUsersUserInfoUpdateTool(BaseTool):
             "description": "Update User Info By Session User",
             "inputSchema": {
                 "type": "object",
-                "properties": {
-                },
+                "properties": {},
+                "additionalProperties": True,
                 "required": []
             }
         }
@@ -25,10 +25,8 @@ class UpdateUserInfoBySessionUserUsersUserInfoUpdateTool(BaseTool):
         """Execute update_user_info_by_session_user_users_user_info_update operation."""
         self._log_execution_start(arguments)
 
-
-
-        # Build request
-        json_data = {}
+        # Build request - pass all arguments as the endpoint accepts generic object
+        json_data = arguments.copy()
 
         response = await self.client.post("/api/v1/users/user/info/update", json_data=json_data)
 

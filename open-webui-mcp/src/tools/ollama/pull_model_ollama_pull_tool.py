@@ -12,15 +12,12 @@ class PullModelOllamaPullTool(BaseTool):
         """Get MCP tool definition."""
         return {
             "name": "pull_model_ollama_pull",
-            "description": "Pull Model",
+            "description": "Pull Model from Ollama",
             "inputSchema": {
                 "type": "object",
                 "properties": {
-                    "url_idx": {
-                        "type": "integer",
-                        "description": "",
-                        "default": 0
-                    }
+                    "model": {"type": ["string", "null"], "description": "Model name to pull"},
+                    "url_idx": {"type": "integer", "description": "URL index", "default": 0}
                 },
                 "required": []
             }
@@ -30,12 +27,17 @@ class PullModelOllamaPullTool(BaseTool):
         """Execute pull_model_ollama_pull operation."""
         self._log_execution_start(arguments)
 
-
         # Query parameter: url_idx
         url_idx = arguments.get("url_idx", 0)
 
-        # Build request
+        # Build request - ModelNameForm has additionalProperties
         json_data = {}
+        if arguments.get("model") is not None:
+            json_data["model"] = arguments["model"]
+        # Pass through any additional properties
+        for k, v in arguments.items():
+            if k not in ["model", "url_idx"] and v is not None:
+                json_data[k] = v
 
         response = await self.client.post("/ollama/api/pull", json_data=json_data)
 

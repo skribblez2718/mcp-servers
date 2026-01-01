@@ -16,8 +16,12 @@ class AddMemoryMemoriesAddTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "content": {
+                        "type": "string",
+                        "description": "The memory content to add"
+                    }
                 },
-                "required": []
+                "required": ["content"]
             }
         }
 
@@ -25,10 +29,10 @@ class AddMemoryMemoriesAddTool(BaseTool):
         """Execute add_memory_memories_add operation."""
         self._log_execution_start(arguments)
 
-
-
-        # Build request
-        json_data = {}
+        # Build request body per AddMemoryForm schema
+        json_data = {
+            "content": arguments.get("content")
+        }
 
         response = await self.client.post("/api/v1/memories/add", json_data=json_data)
 

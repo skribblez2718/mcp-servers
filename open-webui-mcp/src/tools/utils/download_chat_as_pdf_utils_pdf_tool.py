@@ -16,8 +16,20 @@ class DownloadChatAsPdfUtilsPdfTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "title": {
+                        "type": "string",
+                        "description": "The title for the PDF"
+                    },
+                    "messages": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": True
+                        },
+                        "description": "The chat messages to include in the PDF"
+                    }
                 },
-                "required": []
+                "required": ["title", "messages"]
             }
         }
 
@@ -25,10 +37,11 @@ class DownloadChatAsPdfUtilsPdfTool(BaseTool):
         """Execute download_chat_as_pdf_utils_pdf operation."""
         self._log_execution_start(arguments)
 
-
-
-        # Build request
-        json_data = {}
+        # Build request body per ChatTitleMessagesForm schema
+        json_data = {
+            "title": arguments.get("title"),
+            "messages": arguments.get("messages")
+        }
 
         response = await self.client.post("/api/v1/utils/pdf", json_data=json_data)
 

@@ -16,8 +16,13 @@ class ImportConfigConfigsImportTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "config": {
+                        "type": "object",
+                        "additionalProperties": True,
+                        "description": "The configuration object to import"
+                    }
                 },
-                "required": []
+                "required": ["config"]
             }
         }
 
@@ -28,7 +33,9 @@ class ImportConfigConfigsImportTool(BaseTool):
 
 
         # Build request
-        json_data = {}
+        json_data = {
+            "config": arguments.get("config", {})
+        }
 
         response = await self.client.post("/api/v1/configs/import", json_data=json_data)
 

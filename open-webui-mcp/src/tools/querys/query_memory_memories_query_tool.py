@@ -16,8 +16,16 @@ class QueryMemoryMemoriesQueryTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "content": {
+                        "type": "string",
+                        "description": "The query content to search memories"
+                    },
+                    "k": {
+                        "type": "integer",
+                        "description": "Number of results to return (default: 1)"
+                    }
                 },
-                "required": []
+                "required": ["content"]
             }
         }
 
@@ -25,10 +33,13 @@ class QueryMemoryMemoriesQueryTool(BaseTool):
         """Execute query_memory_memories_query operation."""
         self._log_execution_start(arguments)
 
-
-
-        # Build request
-        json_data = {}
+        # Build request body per QueryMemoryForm schema
+        json_data = {
+            "content": arguments.get("content")
+        }
+        # Add optional k parameter if provided
+        if arguments.get("k") is not None:
+            json_data["k"] = arguments.get("k")
 
         response = await self.client.post("/api/v1/memories/query", json_data=json_data)
 

@@ -16,8 +16,23 @@ class SetToolServersConfigConfigsToolServersTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "TOOL_SERVER_CONNECTIONS": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "url": {"type": "string"},
+                                "path": {"type": "string"},
+                                "auth_type": {"type": ["string", "null"]},
+                                "key": {"type": ["string", "null"]},
+                                "config": {"type": ["object", "null"], "additionalProperties": True}
+                            },
+                            "required": ["url", "path", "auth_type", "key", "config"]
+                        },
+                        "description": "Array of tool server connection configurations"
+                    }
                 },
-                "required": []
+                "required": ["TOOL_SERVER_CONNECTIONS"]
             }
         }
 
@@ -28,7 +43,9 @@ class SetToolServersConfigConfigsToolServersTool(BaseTool):
 
 
         # Build request
-        json_data = {}
+        json_data = {
+            "TOOL_SERVER_CONNECTIONS": arguments.get("TOOL_SERVER_CONNECTIONS", [])
+        }
 
         response = await self.client.post("/api/v1/configs/tool_servers", json_data=json_data)
 

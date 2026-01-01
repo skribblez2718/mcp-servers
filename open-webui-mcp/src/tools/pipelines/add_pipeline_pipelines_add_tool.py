@@ -16,8 +16,16 @@ class AddPipelinePipelinesAddTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "url": {
+                        "type": "string",
+                        "description": "The URL of the pipeline to add"
+                    },
+                    "urlIdx": {
+                        "type": "integer",
+                        "description": "The URL index of the pipeline server"
+                    }
                 },
-                "required": []
+                "required": ["url", "urlIdx"]
             }
         }
 
@@ -25,10 +33,11 @@ class AddPipelinePipelinesAddTool(BaseTool):
         """Execute add_pipeline_pipelines_add operation."""
         self._log_execution_start(arguments)
 
-
-
         # Build request
-        json_data = {}
+        json_data = {
+            "url": arguments.get("url"),
+            "urlIdx": arguments.get("urlIdx")
+        }
 
         response = await self.client.post("/api/v1/pipelines/add", json_data=json_data)
 

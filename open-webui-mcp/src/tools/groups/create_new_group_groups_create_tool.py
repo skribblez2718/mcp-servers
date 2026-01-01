@@ -16,8 +16,21 @@ class CreateNewGroupGroupsCreateTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "The name of the group"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description of the group"
+                    },
+                    "permissions": {
+                        "type": "object",
+                        "description": "Optional permissions configuration",
+                        "additionalProperties": True
+                    }
                 },
-                "required": []
+                "required": ["name", "description"]
             }
         }
 
@@ -25,10 +38,13 @@ class CreateNewGroupGroupsCreateTool(BaseTool):
         """Execute create_new_group_groups_create operation."""
         self._log_execution_start(arguments)
 
-
-
-        # Build request
-        json_data = {}
+        # Build request with GroupForm schema
+        json_data = {
+            "name": arguments.get("name"),
+            "description": arguments.get("description")
+        }
+        if arguments.get("permissions"):
+            json_data["permissions"] = arguments.get("permissions")
 
         response = await self.client.post("/api/v1/groups/create", json_data=json_data)
 

@@ -18,10 +18,19 @@ class UpdateFolderNameByIdFoldersIdUpdateTool(BaseTool):
                 "properties": {
                     "id": {
                         "type": "string",
-                        "description": ""
+                        "description": "The folder ID to update"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "The new name for the folder"
+                    },
+                    "data": {
+                        "type": "object",
+                        "description": "Optional additional data for the folder",
+                        "additionalProperties": True
                     }
                 },
-                "required": ["id"]
+                "required": ["id", "name"]
             }
         }
 
@@ -34,9 +43,12 @@ class UpdateFolderNameByIdFoldersIdUpdateTool(BaseTool):
         if id:
             id = ToolInputValidator.validate_id(id, "id")
 
-
-        # Build request
-        json_data = {}
+        # Build request with FolderForm schema
+        json_data = {
+            "name": arguments.get("name")
+        }
+        if arguments.get("data"):
+            json_data["data"] = arguments.get("data")
 
         response = await self.client.post(f"/api/v1/folders/{id}/update", json_data=json_data)
 

@@ -18,10 +18,29 @@ class UpdateNoteByIdNotesIdUpdateTool(BaseTool):
                 "properties": {
                     "id": {
                         "type": "string",
-                        "description": ""
+                        "description": "The note ID to update"
+                    },
+                    "title": {
+                        "type": "string",
+                        "description": "The new title of the note"
+                    },
+                    "data": {
+                        "type": "object",
+                        "description": "Optional note content/data",
+                        "additionalProperties": True
+                    },
+                    "meta": {
+                        "type": "object",
+                        "description": "Optional metadata for the note",
+                        "additionalProperties": True
+                    },
+                    "access_control": {
+                        "type": "object",
+                        "description": "Optional access control settings",
+                        "additionalProperties": True
                     }
                 },
-                "required": ["id"]
+                "required": ["id", "title"]
             }
         }
 
@@ -34,9 +53,16 @@ class UpdateNoteByIdNotesIdUpdateTool(BaseTool):
         if id:
             id = ToolInputValidator.validate_id(id, "id")
 
-
-        # Build request
-        json_data = {}
+        # Build request with NoteForm schema
+        json_data = {
+            "title": arguments.get("title")
+        }
+        if arguments.get("data"):
+            json_data["data"] = arguments.get("data")
+        if arguments.get("meta"):
+            json_data["meta"] = arguments.get("meta")
+        if arguments.get("access_control"):
+            json_data["access_control"] = arguments.get("access_control")
 
         response = await self.client.post(f"/api/v1/notes/{id}/update", json_data=json_data)
 

@@ -12,12 +12,17 @@ class ProcessWebSearchRetrievalProcessWebSearchTool(BaseTool):
         """Get MCP tool definition."""
         return {
             "name": "process_web_search_retrieval_process_web_search",
-            "description": "Process Web Search",
+            "description": "Process Web Search for RAG retrieval",
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "queries": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "List of search queries to process"
+                    }
                 },
-                "required": []
+                "required": ["queries"]
             }
         }
 
@@ -25,10 +30,8 @@ class ProcessWebSearchRetrievalProcessWebSearchTool(BaseTool):
         """Execute process_web_search_retrieval_process_web_search operation."""
         self._log_execution_start(arguments)
 
-
-
         # Build request
-        json_data = {}
+        json_data = {"queries": arguments["queries"]}
 
         response = await self.client.post("/api/v1/retrieval/process/web/search", json_data=json_data)
 

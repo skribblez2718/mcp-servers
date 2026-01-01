@@ -18,10 +18,14 @@ class DeleteTagByIdAndTagNameChatsIdTagsTool(BaseTool):
                 "properties": {
                     "id": {
                         "type": "string",
-                        "description": ""
+                        "description": "Chat ID"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Tag name to delete"
                     }
                 },
-                "required": ["id"]
+                "required": ["id", "name"]
             }
         }
 
@@ -34,11 +38,10 @@ class DeleteTagByIdAndTagNameChatsIdTagsTool(BaseTool):
         if id:
             id = ToolInputValidator.validate_id(id, "id")
 
+        # Build request - DELETE with JSON body (requires delete_with_body method)
+        json_data = {"name": arguments["name"]}
 
-        # Build request
-        params = {}
-
-        response = await self.client.delete(f"/api/v1/chats/{id}/tags", params=params)
+        response = await self.client.delete_with_body(f"/api/v1/chats/{id}/tags", json_data=json_data)
 
         self._log_execution_end(response)
         return response

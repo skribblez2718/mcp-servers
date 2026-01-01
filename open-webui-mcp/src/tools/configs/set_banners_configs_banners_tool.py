@@ -16,8 +16,24 @@ class SetBannersConfigsBannersTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "banners": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {"type": "string", "description": "Banner ID"},
+                                "type": {"type": "string", "description": "Banner type (e.g., 'info', 'warning', 'error')"},
+                                "title": {"type": ["string", "null"], "description": "Banner title (optional)"},
+                                "content": {"type": "string", "description": "Banner content"},
+                                "dismissible": {"type": "boolean", "description": "Whether banner can be dismissed"},
+                                "timestamp": {"type": "integer", "description": "Unix timestamp for the banner"}
+                            },
+                            "required": ["id", "type", "content", "dismissible", "timestamp"]
+                        },
+                        "description": "Array of banner configurations"
+                    }
                 },
-                "required": []
+                "required": ["banners"]
             }
         }
 
@@ -28,7 +44,9 @@ class SetBannersConfigsBannersTool(BaseTool):
 
 
         # Build request
-        json_data = {}
+        json_data = {
+            "banners": arguments.get("banners", [])
+        }
 
         response = await self.client.post("/api/v1/configs/banners", json_data=json_data)
 

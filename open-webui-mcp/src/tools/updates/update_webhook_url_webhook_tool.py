@@ -16,8 +16,12 @@ class UpdateWebhookUrlWebhookTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "url": {
+                        "type": "string",
+                        "description": "The webhook URL to set"
+                    }
                 },
-                "required": []
+                "required": ["url"]
             }
         }
 
@@ -25,10 +29,10 @@ class UpdateWebhookUrlWebhookTool(BaseTool):
         """Execute update_webhook_url_webhook operation."""
         self._log_execution_start(arguments)
 
-
-
-        # Build request
-        json_data = {}
+        # Build request with UrlForm
+        json_data = {
+            "url": arguments.get("url")
+        }
 
         response = await self.client.post("/api/webhook", json_data=json_data)
 

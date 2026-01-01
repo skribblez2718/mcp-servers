@@ -17,11 +17,15 @@ class DownloadModelOllamaModelsDownloadUrlIdxTool(BaseTool):
                 "type": "object",
                 "properties": {
                     "url_idx": {
+                        "type": "integer",
+                        "description": "Index of the Ollama URL to use"
+                    },
+                    "url": {
                         "type": "string",
-                        "description": ""
+                        "description": "URL of the model to download"
                     }
                 },
-                "required": ["url_idx"]
+                "required": ["url_idx", "url"]
             }
         }
 
@@ -35,8 +39,10 @@ class DownloadModelOllamaModelsDownloadUrlIdxTool(BaseTool):
             url_idx = ToolInputValidator.validate_id(url_idx, "url_idx")
 
 
-        # Build request
-        json_data = {}
+        # Build request body - UrlForm
+        json_data = {
+            "url": arguments["url"]
+        }
 
         response = await self.client.post(f"/ollama/models/download/{url_idx}", json_data=json_data)
 

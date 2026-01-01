@@ -16,7 +16,13 @@ class UpdateUserSettingsBySessionUserUsersUserSettingsUpdateTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "ui": {
+                        "type": ["object", "null"],
+                        "additionalProperties": True,
+                        "description": "UI settings object"
+                    }
                 },
+                "additionalProperties": True,
                 "required": []
             }
         }
@@ -25,10 +31,8 @@ class UpdateUserSettingsBySessionUserUsersUserSettingsUpdateTool(BaseTool):
         """Execute update_user_settings_by_session_user_users_user_settings_update operation."""
         self._log_execution_start(arguments)
 
-
-
-        # Build request
-        json_data = {}
+        # Build request - pass all arguments as the settings object supports additionalProperties
+        json_data = arguments.copy()
 
         response = await self.client.post("/api/v1/users/user/settings/update", json_data=json_data)
 

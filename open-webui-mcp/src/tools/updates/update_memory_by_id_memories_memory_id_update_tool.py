@@ -18,7 +18,11 @@ class UpdateMemoryByIdMemoriesMemoryIdUpdateTool(BaseTool):
                 "properties": {
                     "memory_id": {
                         "type": "string",
-                        "description": ""
+                        "description": "The ID of the memory to update"
+                    },
+                    "content": {
+                        "type": "string",
+                        "description": "The new content for the memory"
                     }
                 },
                 "required": ["memory_id"]
@@ -34,9 +38,10 @@ class UpdateMemoryByIdMemoriesMemoryIdUpdateTool(BaseTool):
         if memory_id:
             memory_id = ToolInputValidator.validate_id(memory_id, "memory_id")
 
-
-        # Build request
+        # Build request body per MemoryUpdateModel schema
         json_data = {}
+        if arguments.get("content") is not None:
+            json_data["content"] = arguments.get("content")
 
         response = await self.client.post(f"/api/v1/memories/{memory_id}/update", json_data=json_data)
 

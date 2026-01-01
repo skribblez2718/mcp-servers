@@ -16,6 +16,10 @@ class UpdateLdapConfigAuthsAdminConfigLdapTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "enable_ldap": {
+                        "type": ["boolean", "null"],
+                        "description": "Enable LDAP authentication"
+                    }
                 },
                 "required": []
             }
@@ -29,6 +33,9 @@ class UpdateLdapConfigAuthsAdminConfigLdapTool(BaseTool):
 
         # Build request
         json_data = {}
+        # Add optional field if provided
+        if arguments.get("enable_ldap") is not None:
+            json_data["enable_ldap"] = arguments.get("enable_ldap")
 
         response = await self.client.post("/api/v1/auths/admin/config/ldap", json_data=json_data)
 

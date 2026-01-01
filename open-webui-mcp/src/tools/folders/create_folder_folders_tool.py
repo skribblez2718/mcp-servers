@@ -16,8 +16,17 @@ class CreateFolderFoldersTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "The name of the folder"
+                    },
+                    "data": {
+                        "type": "object",
+                        "description": "Optional additional data for the folder",
+                        "additionalProperties": True
+                    }
                 },
-                "required": []
+                "required": ["name"]
             }
         }
 
@@ -25,10 +34,12 @@ class CreateFolderFoldersTool(BaseTool):
         """Execute create_folder_folders operation."""
         self._log_execution_start(arguments)
 
-
-
-        # Build request
-        json_data = {}
+        # Build request with FolderForm schema
+        json_data = {
+            "name": arguments.get("name")
+        }
+        if arguments.get("data"):
+            json_data["data"] = arguments.get("data")
 
         response = await self.client.post("/api/v1/folders/", json_data=json_data)
 

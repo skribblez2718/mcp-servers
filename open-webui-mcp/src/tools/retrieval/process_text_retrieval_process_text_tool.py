@@ -12,12 +12,15 @@ class ProcessTextRetrievalProcessTextTool(BaseTool):
         """Get MCP tool definition."""
         return {
             "name": "process_text_retrieval_process_text",
-            "description": "Process Text",
+            "description": "Process Text for RAG retrieval",
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "name": {"type": "string", "description": "Name for the text document"},
+                    "content": {"type": "string", "description": "Text content to process"},
+                    "collection_name": {"type": ["string", "null"], "description": "Collection name to store in"}
                 },
-                "required": []
+                "required": ["name", "content"]
             }
         }
 
@@ -25,10 +28,13 @@ class ProcessTextRetrievalProcessTextTool(BaseTool):
         """Execute process_text_retrieval_process_text operation."""
         self._log_execution_start(arguments)
 
-
-
         # Build request
-        json_data = {}
+        json_data = {
+            "name": arguments["name"],
+            "content": arguments["content"]
+        }
+        if arguments.get("collection_name") is not None:
+            json_data["collection_name"] = arguments["collection_name"]
 
         response = await self.client.post("/api/v1/retrieval/process/text", json_data=json_data)
 

@@ -16,8 +16,22 @@ class GetUserChatListByTagNameChatsTagsTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Tag name to filter chats by"
+                    },
+                    "skip": {
+                        "type": ["integer", "null"],
+                        "description": "Number of results to skip",
+                        "default": 0
+                    },
+                    "limit": {
+                        "type": ["integer", "null"],
+                        "description": "Maximum number of results to return",
+                        "default": 50
+                    }
                 },
-                "required": []
+                "required": ["name"]
             }
         }
 
@@ -25,10 +39,12 @@ class GetUserChatListByTagNameChatsTagsTool(BaseTool):
         """Execute get_user_chat_list_by_tag_name_chats_tags operation."""
         self._log_execution_start(arguments)
 
-
-
         # Build request
-        json_data = {}
+        json_data = {"name": arguments["name"]}
+        if arguments.get("skip") is not None:
+            json_data["skip"] = arguments["skip"]
+        if arguments.get("limit") is not None:
+            json_data["limit"] = arguments["limit"]
 
         response = await self.client.post("/api/v1/chats/tags", json_data=json_data)
 

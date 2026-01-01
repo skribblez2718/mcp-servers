@@ -12,16 +12,15 @@ class CopyModelOllamaCopyTool(BaseTool):
         """Get MCP tool definition."""
         return {
             "name": "copy_model_ollama_copy",
-            "description": "Copy Model",
+            "description": "Copy Model in Ollama",
             "inputSchema": {
                 "type": "object",
                 "properties": {
-                    "url_idx": {
-                        "type": "string",
-                        "description": ""
-                    }
+                    "source": {"type": "string", "description": "Source model name"},
+                    "destination": {"type": "string", "description": "Destination model name"},
+                    "url_idx": {"type": ["integer", "null"], "description": "URL index"}
                 },
-                "required": []
+                "required": ["source", "destination"]
             }
         }
 
@@ -29,12 +28,14 @@ class CopyModelOllamaCopyTool(BaseTool):
         """Execute copy_model_ollama_copy operation."""
         self._log_execution_start(arguments)
 
-
         # Query parameter: url_idx
         url_idx = arguments.get("url_idx")
 
-        # Build request
-        json_data = {}
+        # Build request - CopyModelForm
+        json_data = {
+            "source": arguments["source"],
+            "destination": arguments["destination"]
+        }
 
         response = await self.client.post("/ollama/api/copy", json_data=json_data)
 

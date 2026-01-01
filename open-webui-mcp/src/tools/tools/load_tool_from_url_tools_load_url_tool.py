@@ -16,8 +16,15 @@ class LoadToolFromUrlToolsLoadUrlTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "url": {
+                        "type": "string",
+                        "format": "uri",
+                        "minLength": 1,
+                        "maxLength": 2083,
+                        "description": "The URL to load the tool from"
+                    }
                 },
-                "required": []
+                "required": ["url"]
             }
         }
 
@@ -25,10 +32,10 @@ class LoadToolFromUrlToolsLoadUrlTool(BaseTool):
         """Execute load_tool_from_url_tools_load_url operation."""
         self._log_execution_start(arguments)
 
-
-
-        # Build request
-        json_data = {}
+        # Build request - LoadUrlForm
+        json_data = {
+            "url": arguments.get("url")
+        }
 
         response = await self.client.post("/api/v1/tools/load/url", json_data=json_data)
 

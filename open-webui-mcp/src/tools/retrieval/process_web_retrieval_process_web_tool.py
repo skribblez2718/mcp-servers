@@ -12,12 +12,14 @@ class ProcessWebRetrievalProcessWebTool(BaseTool):
         """Get MCP tool definition."""
         return {
             "name": "process_web_retrieval_process_web",
-            "description": "Process Web",
+            "description": "Process Web URL for RAG retrieval",
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "url": {"type": "string", "description": "Web URL to process"},
+                    "collection_name": {"type": ["string", "null"], "description": "Collection name to store in"}
                 },
-                "required": []
+                "required": ["url"]
             }
         }
 
@@ -25,10 +27,10 @@ class ProcessWebRetrievalProcessWebTool(BaseTool):
         """Execute process_web_retrieval_process_web operation."""
         self._log_execution_start(arguments)
 
-
-
         # Build request
-        json_data = {}
+        json_data = {"url": arguments["url"]}
+        if arguments.get("collection_name") is not None:
+            json_data["collection_name"] = arguments["collection_name"]
 
         response = await self.client.post("/api/v1/retrieval/process/web", json_data=json_data)
 

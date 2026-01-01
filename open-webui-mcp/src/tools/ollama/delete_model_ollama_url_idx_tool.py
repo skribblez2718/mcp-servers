@@ -17,8 +17,12 @@ class DeleteModelOllamaUrlIdxTool(BaseTool):
                 "type": "object",
                 "properties": {
                     "url_idx": {
-                        "type": "string",
-                        "description": ""
+                        "type": "integer",
+                        "description": "Index of the Ollama URL to use"
+                    },
+                    "model": {
+                        "type": ["string", "null"],
+                        "description": "Name of the model to delete"
                     }
                 },
                 "required": ["url_idx"]
@@ -35,10 +39,16 @@ class DeleteModelOllamaUrlIdxTool(BaseTool):
             url_idx = ToolInputValidator.validate_id(url_idx, "url_idx")
 
 
-        # Build request
-        params = {}
+        # Build request body - ModelNameForm with additionalProperties
+        json_data = {}
+        if arguments.get("model") is not None:
+            json_data["model"] = arguments["model"]
+        # Pass through any additional properties
+        for key, value in arguments.items():
+            if key not in ["url_idx", "model"] and value is not None:
+                json_data[key] = value
 
-        response = await self.client.delete(f"/ollama/api/delete/{url_idx}", params=params)
+        response = await self.client.delete(f"/ollama/api/delete/{url_idx}", json_data=json_data)
 
         self._log_execution_end(response)
         return response

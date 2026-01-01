@@ -16,8 +16,15 @@ class LoadFunctionFromUrlFunctionsLoadUrlTool(BaseTool):
             "inputSchema": {
                 "type": "object",
                 "properties": {
+                    "url": {
+                        "type": "string",
+                        "format": "uri",
+                        "minLength": 1,
+                        "maxLength": 2083,
+                        "description": "The URL to load the function from"
+                    }
                 },
-                "required": []
+                "required": ["url"]
             }
         }
 
@@ -25,10 +32,10 @@ class LoadFunctionFromUrlFunctionsLoadUrlTool(BaseTool):
         """Execute load_function_from_url_functions_load_url operation."""
         self._log_execution_start(arguments)
 
-
-
-        # Build request
-        json_data = {}
+        # Build request with LoadUrlForm schema
+        json_data = {
+            "url": arguments.get("url")
+        }
 
         response = await self.client.post("/api/v1/functions/load/url", json_data=json_data)
 

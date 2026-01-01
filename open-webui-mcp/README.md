@@ -1118,13 +1118,12 @@ ls -la /home/open-webui-mcp/.env
 # Should show: -rw------- (600 permissions)
 
 # Check 3: Log directory writable?
-ls -la /var/log/open-webui-mcp/
+ls -la /home/open-webui-mcp/log/
 # Should show: open-webui-mcp:open-webui-mcp
 
 # Fix permissions:
 sudo chown -R open-webui-mcp:open-webui-mcp /home/open-webui-mcp
 sudo chmod 600 /home/open-webui-mcp/.env
-sudo chown -R open-webui-mcp:open-webui-mcp /var/log/open-webui-mcp
 ```
 
 #### 6. Tests Failing

@@ -48,7 +48,7 @@ sudo ./deployment/scripts/install.sh
 This script will:
 - Install uv if not present
 - Create `open-webui-mcp` system user
-- Create directories: `/home/open-webui-mcp`, `/var/log/open-webui-mcp`
+- Create directories: `/home/open-webui-mcp`, `/home/open-webui-mcp/log`
 - Copy source code to `/home/open-webui-mcp`
 - Create virtual environment with `uv venv`
 - Install dependencies with `uv sync`
@@ -89,7 +89,7 @@ If you prefer manual installation:
 
 ```bash
 sudo useradd --system --no-create-home --shell /bin/false open-webui-mcp
-sudo mkdir -p /home/open-webui-mcp /var/log/open-webui-mcp
+sudo mkdir -p /home/open-webui-mcp /home/open-webui-mcp/log
 ```
 
 2. Copy source code:
@@ -318,7 +318,7 @@ The systemd service includes comprehensive security hardening:
 - `ProtectHome=true`: No access to user home directories
 - `PrivateTmp=true`: Private `/tmp` directory
 - `ReadOnlyPaths=/opt/open-webui-mcp/src`: Immutable source code
-- `ReadWritePaths=/var/log/open-webui-mcp`: Logs only writable location
+- `ReadWritePaths=/home/open-webui-mcp/log`: Logs only writable location
 
 **User Convention**: Service name matches user name (`open-webui-mcp` service runs as `open-webui-mcp` user)
 
@@ -393,7 +393,7 @@ sudo cat /home/open-webui-mcp/.env
 4. Verify permissions:
 ```bash
 ls -la /home/open-webui-mcp
-ls -la /var/log/open-webui-mcp
+ls -la /home/open-webui-mcp/log
 ```
 
 5. Test manually:
@@ -466,7 +466,7 @@ ls -la /home/open-webui-mcp
 2. Fix ownership if needed:
 ```bash
 sudo chown -R open-webui-mcp:open-webui-mcp /home/open-webui-mcp
-sudo chown -R open-webui-mcp:open-webui-mcp /var/log/open-webui-mcp
+sudo chown -R open-webui-mcp:open-webui-mcp /home/open-webui-mcp/log
 ```
 
 3. Check `.env` permissions:

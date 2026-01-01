@@ -15,7 +15,7 @@ NC='\033[0m' # No Color
 # Configuration
 SERVICE_USER="open-webui-mcp"
 INSTALL_DIR="/home/$SERVICE_USER"
-LOG_DIR="/var/log/open-webui-mcp"
+LOG_DIR="$INSTALL_DIR/log"
 SERVICE_FILE="open-webui-mcp.service"
 SYSTEMD_DIR="/etc/systemd/system"
 

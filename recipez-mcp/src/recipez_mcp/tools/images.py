@@ -36,13 +36,14 @@ class ImagesTool(BaseTool):
                     "type": "string",
                     "description": "Base64-encoded image data (required for upload)",
                 },
-                "image_path": {
+                "filename": {
                     "type": "string",
-                    "description": "File path where image will be stored (required for upload)",
+                    "pattern": "^[a-zA-Z0-9_\\-\\.]+$",
+                    "description": "Filename for the uploaded image. Recommended: UUID format (e.g., '550e8400-e29b-41d4-a716-446655440000.jpg'). Must have .jpg, .jpeg, or .png extension. (required for upload)",
                 },
                 "author_id": {
                     "type": "string",
-                    "description": "Author UUID (required for upload)",
+                    "description": "Author UUID (optional - uses authenticated user if omitted)",
                 },
                 "image_id": {
                     "type": "string",
@@ -68,9 +69,10 @@ class ImagesTool(BaseTool):
             if operation == "upload":
                 payload = {
                     "image_data": params["image_data"],
-                    "image_path": params["image_path"],
-                    "author_id": params["author_id"],
+                    "filename": params["filename"],
                 }
+                if params.get("author_id"):
+                    payload["author_id"] = params["author_id"]
                 result = await self.http_client.post(
                     "/api/image/create",
                     json=payload,

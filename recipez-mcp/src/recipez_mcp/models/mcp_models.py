@@ -354,13 +354,19 @@ class CreateImageInput(BaseModel):
     """Input for uploading an image."""
 
     image_data: str = Field(..., description="Base64-encoded image data")
-    image_path: str = Field(..., description="File path where image will be stored")
-    author_id: str = Field(..., description="Author UUID")
+    filename: str = Field(
+        ...,
+        pattern=r"^[a-zA-Z0-9_\-\.]+$",
+        description="Filename for the uploaded image. Recommended: UUID format (e.g., '550e8400-e29b-41d4-a716-446655440000.jpg'). Must have .jpg, .jpeg, or .png extension."
+    )
+    author_id: Optional[str] = Field(None, description="Author UUID (optional - uses authenticated user if omitted)")
 
     @field_validator("author_id")
     @classmethod
-    def validate_uuid(cls, v: str) -> str:
-        """Validate UUID format."""
+    def validate_uuid(cls, v: Optional[str]) -> Optional[str]:
+        """Validate UUID format if provided."""
+        if v is None:
+            return v
         try:
             UUID(v)
             return v

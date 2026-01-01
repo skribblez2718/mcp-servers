@@ -45,8 +45,8 @@ SystemCallErrorNumber=EPERM
 ReadOnlyPaths=/home/open-webui-mcp/src
 ReadOnlyPaths=/home/open-webui-mcp/.venv
 
-# Writable paths (logs only)
-ReadWritePaths=/var/log/open-webui-mcp
+# Writable paths (logs in user home directory)
+ReadWritePaths=/home/open-webui-mcp/log
 
 # Resource limits
 CPUQuota=80%

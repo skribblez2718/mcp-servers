@@ -227,7 +227,13 @@ class OpenWebUIClient:
 
         if response.status_code >= 200 and response.status_code < 300:
             try:
-                return response.json()
+                data = response.json()
+                # Wrap primitive types (bool, int, float, str, None) in a dict
+                # to ensure consistent response format for MCP framework
+                # Fixes: "object of type 'bool' has no len()" error
+                if not isinstance(data, (dict, list)):
+                    return {"result": data}
+                return data
             except Exception:
                 return {"data": response.text}
 
